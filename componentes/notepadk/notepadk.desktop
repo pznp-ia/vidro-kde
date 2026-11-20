@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=NotepadK
+GenericName=Editor de texto minimalista
+GenericName[en]=Minimal text editor
+Comment=Bloco de notas minimalista: só a área de escrita. Ctrl+Shift+Espaço mostra a interface completa.
+Comment[en]=Distraction-free notepad built on Kate. Ctrl+Shift+Space shows the full interface.
+Exec=notepadk %U
+Icon=kate
+Terminal=false
+Categories=Qt;KDE;Utility;TextEditor;
+MimeType=text/plain;text/markdown;
+StartupNotify=true
+StartupWMClass=kate

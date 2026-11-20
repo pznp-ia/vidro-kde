@@ -1,0 +1,46 @@
+#!/bin/bash
+# NotepadK: Kate com configuração própria e modo foco (só a área de escrita).
+BASE="$HOME/.local/share/notepadk"
+CONF="$BASE/config"
+mkdir -p "$CONF"
+# reaproveita as configurações do KDE (cores, fontes, estilo, atalhos globais...) via atalhos,
+# mas mantém separados os arquivos do Kate/editor.
+for f in "$HOME/.config"/* "$HOME/.config"/.[!.]*; do
+  [ -e "$f" ] || continue
+  n=$(basename "$f")
+  case "$n" in kate*|ktexteditor*|katevirc|kateschemarc|katemetainfos|katepartrc) continue ;; esac
+  [ -e "$CONF/$n" ] || [ -L "$CONF/$n" ] || ln -s "$f" "$CONF/$n"
+done
+# primeira execução: liga o plugin e define um visual limpo de escrita
+if [ ! -f "$CONF/katerc" ]; then
+  cat > "$CONF/katerc" <<'RC'
+[Kate Plugins]
+vidrofocusplugin=true
+
+[General]
+Show Full Path in Title=false
+Show Tab Bar=false
+Show Url Nav Bar=false
+Startup Session=new
+
+[Notification Messages]
+Kate hide sidebars notification message=false
+
+RC
+fi
+# dados próprios (sessões do Kate separadas), reaproveitando o resto de ~/.local/share
+DATA="$BASE/data"
+mkdir -p "$DATA/kate"
+for f in "$HOME/.local/share"/*; do
+  n=$(basename "$f")
+  case "$n" in kate|notepadk) continue ;; esac
+  [ -e "$DATA/$n" ] || [ -L "$DATA/$n" ] || ln -s "$f" "$DATA/$n"
+done
+if [ ! -f "$DATA/kate/anonymous.katesession" ]; then
+  printf '[Kate Plugins]\nvidrofocusplugin=true\nkatefiletreeplugin=true\nkatesearchplugin=true\nkateprojectplugin=true\nkatekonsoleplugin=true\nlspclientplugin=true\n' > "$DATA/kate/anonymous.katesession"
+fi
+export XDG_DATA_HOME="$DATA"
+export VIDRO_FOCUS=1
+export XDG_CONFIG_HOME="$CONF"
+export QT_PLUGIN_PATH="$BASE/install/lib64/plugins${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+exec kate -n "$@"

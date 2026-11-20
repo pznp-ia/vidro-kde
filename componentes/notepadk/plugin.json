@@ -1,0 +1,9 @@
+{
+    "KPlugin": {
+        "Name": "NotepadK: modo foco",
+        "Description": "NotepadK: só a área de escrita, num bloco de cor única; um botão alterna para a interface completa do Kate.",
+        "Authors": [ { "Name": "Vidro" } ],
+        "License": "GPL",
+        "ServiceTypes": [ "KTextEditor/Plugin" ]
+    }
+}

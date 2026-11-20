@@ -1,0 +1,9 @@
+[Unit]
+Description=Vidro: observa troca de papel de parede
+
+[Path]
+PathChanged=%h/.config/plasma-org.kde.plasma.desktop-appletsrc
+Unit=vidro-cor-titulo.service
+
+[Install]
+WantedBy=default.target

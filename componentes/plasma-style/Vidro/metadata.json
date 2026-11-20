@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Vidro (baseado em Breeze, KDE VDG)"
+            }
+        ],
+        "Category": "",
+        "Description": "Breeze com painel e menus de vidro translúcido",
+        "EnabledByDefault": true,
+        "Id": "Vidro",
+        "License": "LGPL",
+        "Name": "Vidro",
+        "Version": "6.30.0",
+        "Website": "https://www.kde.org/"
+    },
+    "X-Plasma-API": "5.0"
+}

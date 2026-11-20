@@ -1,0 +1,9 @@
+{
+    "input-type": "css",
+    "input-version": 1,
+    "name": "Vidro",
+    "description": "Estilo minimalista que combina com a decoração de janelas Vidro (baseado no Breeze do Union).",
+    "version": "1.0",
+    "license": "BSD-2-Clause",
+    "authors": [ "Vidro", "Breeze (Union): Arjen Hiemstra, Akseli Lahtinen" ]
+}

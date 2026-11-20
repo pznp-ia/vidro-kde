@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/Shell",
+    "KPlugin": {
+        "Authors": [{ "Name": "Vidro" }],
+        "Description": "Vidro: bloqueio de tela e logout em vidro translúcido (o resto vem do shell padrão)",
+        "Icon": "user-desktop",
+        "Id": "org.vidro.desktop",
+        "License": "GPL-2.0+",
+        "Name": "Vidro"
+    },
+    "X-KDE-ParentApp": "org.kde.plasmashell",
+    "X-Plasma-APIVersion": "2"
+}

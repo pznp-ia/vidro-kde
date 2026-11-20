@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=Vidro
+Description=Vidro — login minimalista em vidro translúcido
+Author=Vidro
+License=GPL-2.0+
+Type=sddm-theme
+Version=1.0
+Screenshot=preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=vidro
+Theme-API=2.0
+QtVersion=6

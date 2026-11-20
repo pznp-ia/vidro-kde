@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [{ "Name": "Vidro" }],
+        "Category": "",
+        "Description": "Vidro — vidro translúcido escuro: janelas, painel, ícones, estilo de apps e cores",
+        "Id": "org.vidro.desktop",
+        "License": "GPLv2+",
+        "Name": "Vidro",
+        "Version": "1.0"
+    },
+    "X-Plasma-APIVersion": "2"
+}

@@ -1,0 +1,53 @@
+/*
+ * Vidro — ajustes sobre o Breeze (Union).
+ * Ideia: cantos mais redondos (como a moldura das janelas), bordas quase
+ * invisíveis, superfícies "de vidro" levemente claras, sem sombras duras.
+ */
+:root {
+    --corner-radius: 8px;
+
+    /* bordas suaves, translúcidas, derivadas da cor do texto */
+    --hairline-color: modify-color(var(--window-text-color) set-alpha 0.10);
+    --hairline-strong-color: modify-color(var(--window-text-color) set-alpha 0.18);
+    --glass-fill-color: modify-color(var(--window-text-color) set-alpha 0.06);
+    --glass-fill-hover-color: modify-color(var(--window-text-color) set-alpha 0.10);
+    --glass-fill-pressed-color: modify-color(var(--window-text-color) set-alpha 0.15);
+
+    --window-border-color: var(--hairline-color);
+    --view-border-color: var(--hairline-color);
+    --header-border-color: var(--hairline-color);
+    --card-border-color: var(--hairline-color);
+
+    --highlight-hover-color: modify-color(var(--highlight-color) set-alpha 0.16);
+    --focus-outline-alpha: 0.22;
+    --focus-outline: 2px solid var(--focus-color);
+
+    --shadow-color: rgba(0, 0, 0, 0.0);
+    --dialog-shadow: 0px 8px 32px 0px rgba(0, 0, 0, 0.35);
+
+    /* botões: vidro claro e sem relevo */
+    --button-active-background-color: var(--glass-fill-color);
+    --button-active-border-color: var(--hairline-color);
+    --button-active-checked-color: var(--glass-fill-pressed-color);
+    --button-active-highlight-color: var(--glass-fill-hover-color);
+    --button-active-border-highlight-color: modify-color(var(--highlight-color) set-alpha 0.55);
+    --button-inactive-background-color: var(--glass-fill-color);
+    --button-inactive-border-color: var(--hairline-color);
+    --button-disabled-background-color: modify-color(var(--window-text-color) set-alpha 0.03);
+    --button-disabled-border-color: modify-color(var(--window-text-color) set-alpha 0.06);
+    --button-border: 1px solid var(--button-active-border-color);
+    --button-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.0);
+
+    /* menus suspensos combinando com os pop-ups de vidro do Plasma */
+    --combobox-popup-background-color: var(--window-background-color);
+    --combobox-popup-highlight-color: modify-color(var(--highlight-color) set-alpha 0.22);
+
+    --indicator-color: modify-color(var(--window-text-color) set-alpha 0.30);
+}
+
+/* realce de hover em botões: preenchimento suave em vez de só a borda */
+button, toolbutton, combobox, roundbutton, delaybutton, toolbutton.raised {
+    &:hovered {
+        background-color: var(--glass-fill-hover-color);
+    }
+}

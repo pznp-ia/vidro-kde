@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "Appearance",
+        "Description": "Maximizar/restaurar suave com fade (tema Vidro)",
+        "EnabledByDefault": false,
+        "Id": "vidro_maximize",
+        "License": "GPL",
+        "Name": "Vidro: Maximizar suave"
+    },
+    "X-KDE-Ordering": 60,
+    "X-KWin-Exclusive-Category": "maximize",
+    "X-Plasma-API": "javascript"
+}

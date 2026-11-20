@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "aurorae",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro (baseado em ChromeOS-dark de Vince Liuice)" } ],
+        "Category": "Plasma 6 Window Decorations",
+        "ServiceTypes": [ "aurorae" ],
+        "EnabledByDefault": true,
+        "Name": "Vidro",
+        "Description": "Decoração de vidro translúcido com desfoque, estilo macOS",
+        "Id": "Vidro",
+        "License": "GPL v3",
+        "Version": "1.0",
+        "X-KDE-PluginInfo-blur": true
+    }
+}
