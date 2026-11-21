@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(vidroscroll LANGUAGES CXX)
+set(CMAKE_AUTOMOC ON)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+add_library(vidroscroll MODULE vidroscroll.cpp)
+target_link_libraries(vidroscroll Qt6::Widgets)

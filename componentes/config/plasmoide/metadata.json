@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "System Information",
+        "Description": "Configurações do tema Vidro: barra de rolagem, transparência e outros",
+        "Icon": "preferences-desktop-theme",
+        "Id": "org.vidro.config",
+        "License": "GPL-3.0+",
+        "Name": "Configurações do Vidro",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

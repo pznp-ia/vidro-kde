@@ -14,13 +14,20 @@ D="${XDG_DATA_HOME:-$HOME/.local/share}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}"
 BIN="$HOME/.local/bin"
 LIGAR=1
-[ "${1:-}" = "--sem-ligar" ] && LIGAR=0
+ATUALIZAR=0
+for a in "$@"; do
+    case "$a" in
+        --sem-ligar) LIGAR=0 ;;
+        --atualizar) ATUALIZAR=1 ;;   # usado pelo vidro-atualizar: mantém as configurações atuais
+    esac
+done
+VERSAO=$(cat "$AQUI/VERSAO" 2>/dev/null || echo "?")
 
 ok()   { printf '  \e[32m✓\e[0m %s\n' "$*"; }
 aviso(){ printf '  \e[33m!\e[0m %s\n' "$*"; }
 erro() { printf '\e[31mErro:\e[0m %s\n' "$*" >&2; exit 1; }
 
-echo "Vidro — instalação"
+if [ "$ATUALIZAR" = 1 ]; then echo "Vidro — atualização para $VERSAO"; else echo "Vidro $VERSAO — instalação"; fi
 
 # ---------- requisitos ----------
 command -v plasmashell >/dev/null || erro "KDE Plasma não encontrado."
@@ -38,7 +45,9 @@ for f in kdeglobals kwinrc plasmarc kcminputrc ksplashrc kscreenlockerrc; do
     [ -f "$CFG/$f" ] && cp -a "$CFG/$f" "$B/"
 done
 [ -d "$CFG/kdedefaults" ] && cp -a "$CFG/kdedefaults" "$B/"
-echo "$B" > "$D/vidro/ultimo-backup"
+# "ultimo-backup" é o que o desinstalador restaura: guarda o de ANTES do Vidro, não o de uma atualização
+ULT=$(cat "$D/vidro/ultimo-backup" 2>/dev/null || true)
+if [ -z "$ULT" ] || [ ! -d "$ULT" ]; then echo "$B" > "$D/vidro/ultimo-backup"; fi
 ok "backup das configurações em $B"
 
 # ---------- arquivos ----------
@@ -78,14 +87,44 @@ fi
 
 # scripts
 mkdir -p "$BIN"
-for s in vidro-tema vidro-transparencia vidro-cor-titulo; do install -m 755 "$AQUI/bin/$s" "$BIN/$s"; done
+for s in vidro-tema vidro-transparencia vidro-cor-titulo vidro-config vidro-atualizar; do install -m 755 "$AQUI/bin/$s" "$BIN/$s"; done
 mkdir -p "$CFG/systemd/user"
 cp "$AQUI/systemd/vidro-cor-titulo.path" "$AQUI/systemd/vidro-cor-titulo.service" "$CFG/systemd/user/"
 if command -v magick >/dev/null; then
     systemctl --user daemon-reload
     systemctl --user enable --now vidro-cor-titulo.path >/dev/null 2>&1 || true
 fi
-ok "comandos vidro-tema, vidro-transparencia, vidro-cor-titulo"
+ok "comandos vidro-tema, vidro-transparencia, vidro-cor-titulo, vidro-config, vidro-atualizar"
+
+# ---------- app "Configurações do Vidro" + módulos ----------
+copia "$C/config/plasmoide" "$D/plasma/plasmoids/org.vidro.config"
+mkdir -p "$D/vidro" "$D/applications"
+copia "$C/config/modulos" "$D/vidro/modulos"
+copia "$C/config/modelos" "$D/vidro/modelos"
+copia "$C/VidroClaro.colors" "$D/color-schemes/VidroClaro.colors"
+cp "$C/config/vidro-configuracoes.desktop" "$D/applications/"
+echo "$VERSAO" > "$D/vidro/versao"
+ok "app \"Configurações do Vidro\" (menu de apps, ou clique direito no widget de transparência)"
+
+# ---------- partes nativas: janela de prévia e barra de rolagem sobreposta ----------
+# Compiladas com o Qt indicado em componentes/nativo/QT; o Qt não carrega um plugin feito
+# com uma versão mais nova que a dele. Se o seu for mais antigo, tenta compilar (cmake + g++).
+QT_SIS=$(rpm -q --qf '%{VERSION}' qt6-qtbase 2>/dev/null || pkg-config --modversion Qt6Core 2>/dev/null || true)
+QT_BIN=$(cat "$C/nativo/QT" 2>/dev/null)
+nativo_ok=0
+if [ -n "$QT_SIS" ] && [ "$(printf '%s\n%s\n' "$QT_BIN" "$QT_SIS" | sort -V | head -1)" = "$QT_BIN" ]; then
+    nativo_ok=1
+elif bash "$C/nativo/compilar.sh" "$C/nativo" >/dev/null 2>&1; then
+    nativo_ok=1
+fi
+if [ "$nativo_ok" = 1 ]; then
+    mkdir -p "$D/vidro/bin" "$D/vidro/qtplugins/styles"
+    install -m 755 "$C/nativo/vidro-previa" "$D/vidro/bin/vidro-previa"
+    install -m 755 "$C/nativo/libvidroscroll.so" "$D/vidro/qtplugins/styles/libvidroscroll.so"
+    ok "janela de prévia e barra de rolagem sobreposta"
+else
+    aviso "Qt ${QT_SIS:-?} mais antigo que ${QT_BIN} e sem compilador: barra sobreposta e janela de prévia ficam de fora."
+fi
 
 # ---------- tela de bloqueio e logout (pacote de shell) ----------
 # Os arquivos QML são da versão 6.8 do Plasma; em outra versão podem não abrir —
@@ -111,15 +150,29 @@ else
 fi
 
 # ---------- ligar ----------
+if [ "$ATUALIZAR" = 1 ]; then
+    # não liga nem desliga nada: só refaz o que os módulos geram, com as configurações de ~/.config/vidrorc
+    if [ "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = org.vidro.desktop ]; then
+        "$BIN/vidro-config" aplicar >/dev/null 2>&1 || aviso "algum módulo falhou ao reaplicar: abra as Configurações do Vidro."
+        "$BIN/vidro-cor-titulo" --force >/dev/null 2>&1 || true
+        dbus-send --session --type=method_call --dest=org.kde.KWin /KWin org.kde.KWin.reconfigure
+    fi
+    echo
+    echo "Atualizado para $VERSAO. Algumas partes (barra de rolagem, tela de bloqueio) valem depois de sair e entrar na sessão."
+    exit 0
+fi
 if [ "$LIGAR" = 1 ]; then
     UNION_OK=$UNION "$BIN/vidro-tema" ligar || true
     # padrões do Vidro (só se ainda não houver valor)
     [ -n "$(kreadconfig6 --file kwinrc --group Effect-vidro_opacity --key Level)" ] || "$BIN/vidro-transparencia" 50 >/dev/null
+    "$BIN/vidro-config" aplicar >/dev/null 2>&1 || aviso "algum módulo das Configurações do Vidro falhou."
 fi
 
 echo
 echo "Pronto! Dicas:"
 echo "  • Adicione o widget \"Transparência das janelas\" ao painel para ajustar a transparência."
+echo "  • Ajustes de tudo: app \"Configurações do Vidro\" (ou clique direito no widget)."
+echo "  • Atualizar:  vidro-atualizar   (ou a aba \"Atualizações\" no app)"
 echo "  • vidro-tema desligar  → volta ao Breeze Dark;  vidro-tema ligar → volta ao Vidro."
 echo "  • Login (SDDM) Vidro:  sudo bash componentes/sddm/instalar-sddm.sh"
 echo "  • NotepadK:            bash componentes/notepadk/instalar-notepadk.sh"

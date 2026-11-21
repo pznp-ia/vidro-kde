@@ -1,0 +1,93 @@
+#!/bin/bash
+# vidro-atualizar — atualiza o Vidro com as versões publicadas no GitHub.
+#
+#   vidro-atualizar               instala a versão mais nova (se houver)
+#   vidro-atualizar --verificar   só diz se há versão nova (não instala nada)
+#   vidro-atualizar --lista       lista as versões publicadas
+#   vidro-atualizar --versao v21  instala uma versão específica (também serve para voltar)
+#
+# As suas configurações (~/.config/vidrorc) e o backup de antes do Vidro são mantidos.
+set -uo pipefail
+REPO="${VIDRO_REPO:-pznp-ia/vidro-kde}"
+API="https://api.github.com/repos/$REPO"
+D="${XDG_DATA_HOME:-$HOME/.local/share}"
+INSTALADA=$(cat "$D/vidro/versao" 2>/dev/null || echo "nenhuma")
+
+erro() { echo "Erro: $*" >&2; exit 1; }
+command -v curl >/dev/null || erro "curl não encontrado."
+
+baixar_json() { curl -fsSL --max-time 20 -H 'Accept: application/vnd.github+json' "$1"; }
+
+# versões publicadas: "tag<TAB>data<TAB>url do pacote<TAB>título", da mais nova para a mais velha
+versoes() {
+    baixar_json "$API/releases?per_page=50" | python3 -I -c '
+import json, sys
+for r in json.load(sys.stdin):
+    if r.get("draft") or r.get("prerelease"):
+        continue
+    print("\t".join([r["tag_name"], (r.get("published_at") or "")[:10], r["tarball_url"], (r.get("name") or r["tag_name"]).replace("\t", " ")]))
+'
+}
+
+# 1 se $1 for mais nova que $2 (v9 < v10 < v10b)
+mais_nova() {
+    python3 -I - "$1" "$2" <<'EOF'
+import re, sys
+def chave(v):
+    return [(int(p), '') if p.isdigit() else (-1, p) for p in re.findall(r'\d+|[a-z]+', v.lower().lstrip('v'))]
+sys.exit(0 if chave(sys.argv[1]) > chave(sys.argv[2]) else 1)
+EOF
+}
+
+LISTA=$(versoes) || erro "não consegui falar com o GitHub ($REPO). Sem internet?"
+[ -n "$LISTA" ] || erro "nenhuma versão publicada em $REPO."
+ULTIMA=$(printf '%s\n' "$LISTA" | head -1 | cut -f1)
+
+case "${1:-}" in
+--verificar)
+    echo "instalada=$INSTALADA"
+    echo "disponivel=$ULTIMA"
+    if [ "$INSTALADA" = nenhuma ] || mais_nova "$ULTIMA" "$INSTALADA"; then
+        echo "estado=nova"
+        baixar_json "$API/releases/tags/$ULTIMA" | python3 -I -c 'import json,sys; print("notas=" + (json.load(sys.stdin).get("body") or "").replace("\r","").replace("\n","\\n"))' 2>/dev/null
+    else
+        echo "estado=atual"
+    fi
+    exit 0 ;;
+--lista)
+    printf '%s\n' "$LISTA" | while IFS=$'\t' read -r tag data _ nome; do
+        m=" "; [ "$tag" = "$INSTALADA" ] && m="*"
+        printf '%s %-6s %s  %s\n' "$m" "$tag" "$data" "$nome"
+    done
+    exit 0 ;;
+--versao)
+    ALVO="${2:-}"; [ -n "$ALVO" ] || erro "diga a versão, ex.: vidro-atualizar --versao v21" ;;
+"")
+    ALVO="$ULTIMA"
+    if [ "$INSTALADA" != nenhuma ] && ! mais_nova "$ALVO" "$INSTALADA"; then
+        echo "O Vidro já está na versão mais nova ($INSTALADA)."; exit 0
+    fi ;;
+*)
+    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac
+
+URL=$(printf '%s\n' "$LISTA" | awk -F'\t' -v t="$ALVO" '$1 == t { print $3 }')
+[ -n "$URL" ] || erro "a versão $ALVO não existe. Veja: vidro-atualizar --lista"
+
+echo "Baixando o Vidro $ALVO (instalada: $INSTALADA)…"
+T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+curl -fsSL --max-time 300 "$URL" -o "$T/vidro.tar.gz" || erro "falha ao baixar $URL"
+mkdir "$T/vidro"
+tar -xzf "$T/vidro.tar.gz" -C "$T/vidro" --strip-components=1 || erro "pacote baixado está corrompido."
+[ -f "$T/vidro/instalar.sh" ] || erro "o pacote não tem instalar.sh."
+[ -f "$T/vidro/VERSAO" ] || echo "$ALVO" > "$T/vidro/VERSAO"
+
+if [ "$INSTALADA" = nenhuma ]; then
+    bash "$T/vidro/instalar.sh"
+else
+    # versões antigas (até a v17) não conhecem --atualizar e trocariam o backup de antes do Vidro
+    ULT=$(cat "$D/vidro/ultimo-backup" 2>/dev/null || true)
+    bash "$T/vidro/instalar.sh" --atualizar
+    [ -n "$ULT" ] && echo "$ULT" > "$D/vidro/ultimo-backup"
+    echo "$ALVO" > "$D/vidro/versao"
+fi

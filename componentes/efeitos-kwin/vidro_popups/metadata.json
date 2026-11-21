@@ -3,7 +3,7 @@
     "KPlugin": {
         "Authors": [ { "Name": "Vidro (baseado em Fading Popups de Vlad Zahorodnii)" } ],
         "Category": "Appearance",
-        "Description": "Menus e pop-ups abrem e fecham com fade e leve zoom (tema Vidro)",
+        "Description": "Menus e pop-ups abrem e fecham rápido, com fade, leve zoom e deslize (tema Vidro; ajuste em Configurações do Vidro → Menus)",
         "EnabledByDefault": false,
         "Id": "vidro_popups",
         "License": "GPL",

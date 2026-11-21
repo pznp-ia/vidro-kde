@@ -59,9 +59,32 @@ function isPopupWindow(window) {
 }
 
 var fadingPopupsEffect = {
+    // Vidro: duração (ms), escala inicial (%) e deslize (px) vêm do kwinrc [Effect-vidro_popups]
+    // (Configurações do Vidro → Menus). Escala 100 e deslize 0 = só fade.
     loadConfig: function () {
-        fadingPopupsEffect.fadeInDuration = animationTime(220);
-        fadingPopupsEffect.fadeOutDuration = animationTime(200);
+        fadingPopupsEffect.fadeInDuration = animationTime(effect.readConfig("Entrada", 150));
+        fadingPopupsEffect.fadeOutDuration = animationTime(effect.readConfig("Saida", 110));
+        fadingPopupsEffect.scale = Math.max(0.7, Math.min(1, effect.readConfig("Escala", 97) / 100));
+        fadingPopupsEffect.slide = Math.max(0, Math.min(40, effect.readConfig("Deslize", 6)));
+    },
+    extra: function (window, opening) {
+        var a = [];
+        var s = fadingPopupsEffect.scale, d = fadingPopupsEffect.slide;
+        if (s < 0.999) {
+            a.push({ type: Effect.Scale, curve: opening ? QEasingCurve.OutCubic : QEasingCurve.InCubic,
+                     from: opening ? { value1: s, value2: s } : { value1: 1, value2: 1 },
+                     to: opening ? { value1: 1, value2: 1 } : { value1: s, value2: s } });
+        }
+        if (d > 0) {
+            // tooltips e menus descem levemente até o lugar; popups do painel sobem a partir dele
+            var g = window.frameGeometry || window.geometry;
+            var area = effects.virtualScreenGeometry;
+            var dy = (g && area && g.y + g.height / 2 > area.y + area.height / 2) ? d : -d;
+            a.push({ type: Effect.Translation, curve: opening ? QEasingCurve.OutCubic : QEasingCurve.InCubic,
+                     from: opening ? { value1: 0, value2: dy } : { value1: 0, value2: 0 },
+                     to: opening ? { value1: 0, value2: 0 } : { value1: 0, value2: dy * 0.6 } });
+        }
+        return a;
     },
     slotWindowAdded: function (window) {
         if (effects.hasActiveFullScreenEffect) {
@@ -81,7 +104,7 @@ var fadingPopupsEffect = {
             duration: fadingPopupsEffect.fadeInDuration,
             animations: [
                 { type: Effect.Opacity, curve: QEasingCurve.OutCubic, from: 0.0, to: 1.0 }
-            ]
+            ].concat(fadingPopupsEffect.extra(window, true))
         });
     },
     slotWindowClosed: function (window) {
@@ -101,8 +124,8 @@ var fadingPopupsEffect = {
             window: window,
             duration: fadingPopupsEffect.fadeOutDuration,
             animations: [
-                { type: Effect.Opacity, curve: QEasingCurve.InOutSine, from: 1.0, to: 0.0 }
-            ]
+                { type: Effect.Opacity, curve: QEasingCurve.InCubic, from: 1.0, to: 0.0 }
+            ].concat(fadingPopupsEffect.extra(window, false))
         });
     },
     slotWindowDataChanged: function (window, role) {

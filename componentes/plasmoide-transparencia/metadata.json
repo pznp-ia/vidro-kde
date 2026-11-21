@@ -11,7 +11,7 @@
         "Icon": "contrast",
         "Id": "org.vidro.transparencia",
         "License": "GPL-2.0+",
-        "Name": "Transparência das janelas",
+        "Name": "Vidro: transparência e configurações",
         "Version": "1.1"
     },
     "X-Plasma-API-Minimum-Version": "6.0"

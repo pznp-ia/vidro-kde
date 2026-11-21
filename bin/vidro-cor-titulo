@@ -26,6 +26,8 @@ fi
 lum=$(magick "$img" -resize 200x200! -colorspace Gray \( +clone -crop 200x100+0+0 \) -delete 0 -format '%[fx:mean]' info: 2>/dev/null)
 [ -n "$lum" ] || exit 0
 mode=$(python3 -I -c "print('claro' if $lum > 0.58 else 'escuro')")
+# opção "Claro" das Configurações do Vidro ligada: a barra fica sempre clara
+[ "$("$HOME/.local/bin/vidro-config" get Claro ativo 2>/dev/null)" = true ] && mode=claro
 key="$img|$mode"
 if [ "$1" != "--force" ] && [ -f "$STATE" ] && [ "$(cat "$STATE")" = "$key" ]; then exit 0; fi
 python3 -I "$THEME/fonte/gerar-vidro.py" "$THEME" "$mode" >/dev/null

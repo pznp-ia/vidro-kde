@@ -1,5 +1,32 @@
 # Mudanças
 
+## v22 — 21/11/2026
+- **Atualizador:** `vidro-atualizar` (e a aba **Atualizações** no app) procura as versões publicadas no GitHub, mostra as novidades e instala por cima, mantendo as configurações e o backup de antes do Vidro. Também instala uma versão específica (`--versao`), o que serve para voltar.
+- O EditorKden só é criado se o Kdenlive (flatpak) estiver instalado.
+- A opção de mexer no Zen Browser foi retirada: o Zen fica com o visual dele.
+
+## v21 — 21/11/2026
+- O app **Configurações do Vidro** virou uma janela de verdade: abas na lateral, cada uma com um **exemplo desenhado que muda na hora** e botão "Recarregar Plasma".
+- Widget de transparência: clique esquerdo = controle rápido; **clique direito → "Configurações do Vidro…"**.
+- A janela de configurações fica sempre opaca.
+
+## v20 — 21/11/2026
+- **Barra de rolagem por cima do conteúdo**, transparente de verdade, que some quando parada (plugin do Qt próprio; vale depois do próximo login). Ajustes de tempo para sumir e visibilidade quando parada.
+- **Cores:** cor de destaque e cor da fonte personalizáveis (com força na seleção e texto secundário).
+
+## v19 — 20/11/2026
+- **Menus (clique direito):** cantos, opacidade, espaçamento, linhas separadoras, contorno, realce (vidro, destaque ou cor) e animação de abrir/fechar.
+- **Menu iniciar e pop-ups do painel:** cantos, fundo (do tema ou cor), opacidade, contorno, sombra.
+- **Cores das pastas:** grafite, escuro, cor de destaque ou qualquer cor, com brilho, relevo e saturação.
+- Cor personalizada também para a barra de título e o fundo das listas.
+- Janela de prévia para ver o estilo novo sem reabrir os apps.
+
+## v18 — 20/11/2026
+- Primeira versão do app **Configurações do Vidro** e do comando `vidro-config` (configurações em `~/.config/vidrorc`).
+- **Barra de rolagem** fina com estilos vidro, neon fino ou cor escolhida (largura, opacidade, realce, arredondamento, trilho).
+- **Dolphin** sem linhas de separação e com a área de arquivos na cor da interface.
+- **Versão clara** (teste) e **EditorKden** (Kdenlive minimalista, com configuração própria).
+
 ## v17 — 20/11/2026
 - **Sombras refeitas:** perfil gaussiano (o mesmo de um desfoque real), sombra maior e levemente caída para baixo. Acabou a faixa escura dura embaixo das janelas e as emendas nos cantos.
 - **Transparência:** o máximo do controle agora é 75 % para a janela ativa e 60 % para as inativas (antes era 92 % e 80 %).

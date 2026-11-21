@@ -1,7 +1,7 @@
 "use strict";
 // Level 0..100 (kwinrc [Effect-vidro_opacity] Level). 0 = tudo opaco.
 // 100 = janela ativa 75% (apps KDE), inativas 60%.
-const EXCLUDE = /^(org\.kde\.(haruna|kdenlive|gwenview|okular))$|steam_app_|gamescope|^steam$|mpv|vlc|obs/i;
+const EXCLUDE = /^(org\.kde\.(haruna|kdenlive|gwenview|okular|plasmawindowed))$|plasmawindowed|steam_app_|gamescope|^steam$|mpv|vlc|obs/i;  // plasmawindowed = Configurações do Vidro (sempre opaca para ler)
 const ACTIVE_RE = /^org\.kde\.\w+$|^(konsole|dolphin)$/i;
 
 const vidroOpacity = {

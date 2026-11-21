@@ -25,6 +25,15 @@
 | **Tela de bloqueio e de sair** | Breeze | relógio fino, campo de senha de vidro, fundo desfocado do seu papel de parede (Plasma 6.8) |
 | **Login (SDDM)** | Breeze | tela de login de vidro (opcional, precisa de `sudo`) |
 | **NotepadK** | — | bloco de notas feito sobre o Kate: a janela vira um bloco só da cor do texto, e a interface completa aparece com um clique |
+| **Configurações do Vidro** | — | app com uma aba por recurso, cada uma com um exemplo que muda na hora: liga/desliga e ajusta tudo abaixo |
+| **Barra de rolagem** | Breeze | fina, de vidro, **por cima do conteúdo** e some quando parada (como no macOS); estilos vidro, neon fino ou cor escolhida |
+| **Menus (clique direito)** | Breeze | cantos, opacidade, espaçamento, realce e animação de abrir/fechar ajustáveis |
+| **Menu iniciar e pop-ups do painel** | Breeze | fundo de vidro com cantos, contorno e sombra ajustáveis |
+| **Cores** | do esquema | cor de destaque e cor da fonte personalizáveis; cores das pastas (grafite, destaque ou qualquer cor) |
+| **Dolphin** | linhas entre as partes | sem linhas de separação, área de arquivos na cor da interface |
+| **Versão clara** *(teste)* | — | as mesmas transparências com cores claras |
+| **EditorKden** | — | atalho para o Kdenlive com visual minimalista (só se o Kdenlive flatpak estiver instalado; o Kdenlive normal não muda) |
+| **Atualizações** | — | `vidro-atualizar` (ou a aba no app) baixa as versões novas daqui do GitHub |
 
 ### Sombras
 
@@ -33,6 +42,33 @@ A sombra é desenhada pelo próprio tema com um perfil gaussiano (o mesmo de um 
 ![Sombra antes e depois](docs/fotos/sombras-antes-depois.jpg)
 
 ![Canto da janela de perto](docs/fotos/sombra-canto.jpg)
+
+### Configurações do Vidro
+
+Abra pelo menu de apps (**Configurações do Vidro**) ou com o **clique direito no widget** de transparência. Cada aba tem um exemplo desenhado que muda na hora em que você mexe; os apps já abertos pegam as mudanças de estilo quando são reabertos.
+
+![Todas as abas das Configurações do Vidro](docs/fotos/config-todas-as-abas.jpg)
+
+| | |
+|---|---|
+| ![Barra de rolagem](docs/fotos/config-barra-de-rolagem.jpg) | ![Menus](docs/fotos/config-menus.jpg) |
+| **Barra de rolagem:** por cima do conteúdo, some quando parada | **Menus:** cantos, fundo, realce e animação |
+| ![Menu iniciar](docs/fotos/config-menu-iniciar.jpg) | ![Cores das pastas](docs/fotos/config-cores-das-pastas.jpg) |
+| **Menu iniciar e pop-ups do painel** | **Cores das pastas** |
+| ![Cores](docs/fotos/config-cores-destaque-fonte.jpg) | ![Dolphin](docs/fotos/config-dolphin.jpg) |
+| **Cor de destaque e da fonte** | **Dolphin sem linhas de separação** |
+
+O Dolphin com pastas na cor de destaque, sem linhas entre as partes e com a barra de rolagem fina:
+
+![Dolphin com o Vidro](docs/fotos/dolphin-pastas.jpg)
+
+As configurações ficam em `~/.config/vidrorc` e também podem ser mudadas pelo terminal:
+
+```bash
+vidro-config json                              # tudo, com os valores padrão
+vidro-config set Barra largura 8 --aplicar     # muda e aplica
+vidro-config aplicar                           # reaplica tudo
+```
 
 ### NotepadK
 
@@ -72,6 +108,17 @@ Tudo é instalado só na sua conta (`~/.local/share`, `~/.local/bin`, `~/.config
 Depois:
 - **saia e entre de novo** na sessão (a tela de bloqueio nova vale a partir do próximo login);
 - adicione o widget **"Transparência das janelas"** ao painel (clique direito no painel → Adicionar widgets).
+
+### Atualizar
+
+```bash
+vidro-atualizar               # instala a versão mais nova, se houver
+vidro-atualizar --verificar   # só verifica
+vidro-atualizar --lista       # versões publicadas
+vidro-atualizar --versao v17  # instala uma versão específica (também serve para voltar)
+```
+
+Ou pela aba **Atualizações** do app. A atualização mantém as suas configurações e o backup de antes do Vidro.
 
 ### Ligar e desligar
 
@@ -115,6 +162,7 @@ Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um
 - **Bazzite e outras imagens "deck":** o Bazzite desativa o bloqueio de tela e a troca de usuário (`/etc/xdg/kdeglobals`) e entra direto no modo jogo, sem passar pelo SDDM. Em `extras/bazzite-liberar-bloqueio/` há um script (com `sudo`) que libera o **Win+L**, e um para desfazer.
 - **Efeitos do KWin** (`vidro_maximize`, `vidro_minimize`, `vidro_popups`, `vidro_opacity`) são JavaScript e aparecem em *Configurações do sistema → Efeitos da área de trabalho*; dá para desligar cada um ali.
 - **A decoração** é gerada por `componentes/aurorae-Vidro/fonte/gerar-vidro.py` (modo `escuro` ou `claro`); edite as constantes no topo para mudar raio, cores ou sombra.
+- **Barra de rolagem por cima do conteúdo:** o estilo Union não permite isso só com CSS, então o Vidro tem um pequeno plugin do Qt (`componentes/nativo`, código em `fonte/`). Ele vem compilado para o Qt 6.11; com um Qt mais antigo o instalador tenta compilar (`cmake` + `g++`) e, sem compilador, pula essa parte. Ligar ou desligar vale a partir do próximo login.
 - **Os ícones** de pastas e documentos são gerados por `componentes/icones/Vidro/fonte/gerar-icones.py`.
 
 ## Problemas conhecidos
@@ -140,5 +188,8 @@ GPL-3.0-or-later para o código próprio. Partes derivadas do KDE mantêm a lice
 - a Plasma style, a color scheme, a Union app style and a minimalist folder/document icon theme;
 - matching lock, logout and SDDM login screens;
 - **NotepadK**, a distraction-free notepad built on Kate (a Kate plugin).
+- **Vidro Settings** app (one tab per feature, each with a live preview): overlay macOS-like scrollbar, menu and panel-popup styling, accent/font/folder colors, borderless Dolphin, an experimental light variant and a minimalist Kdenlive launcher (EditorKden).
+
+Update with `vidro-atualizar` (fetches the releases published here; your settings are kept) or from the "Atualizações" tab of the app.
 
 Install with `./instalar.sh` (per-user, no root; your settings are backed up first). Remove with `./desinstalar.sh`. Optional: `sudo bash componentes/sddm/instalar-sddm.sh` for the login screen and `bash componentes/notepadk/instalar-notepadk.sh` for NotepadK. Messages and docs are in Brazilian Portuguese.

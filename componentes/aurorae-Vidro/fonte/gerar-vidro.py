@@ -19,6 +19,13 @@ STATES = {
   'decoration-inactive': dict(base='rgba(236,236,242,0.42)', hl=0.45, glow=0.12, outline=0.20, sh=0.28, sep=0.08),
 }
 INACT_BTN = ('#fff', 0.16, 0.35) if MODE == 'escuro' else ('#000', 0.14, 0.18)
+# VIDRO_ALFA (0.2-1.6, padrão 1): multiplica a opacidade do vidro da barra (usado pela opção "Claro")
+try: _ALFA = max(0.2, min(1.6, float(os.environ.get('VIDRO_ALFA', '1'))))
+except ValueError: _ALFA = 1.0
+if _ALFA != 1.0:
+    for _st in STATES.values():
+        _r, _g, _b, _a = _st['base'][5:-1].split(',')
+        _st['base'] = f'rgba({_r},{_g},{_b},{min(0.98, float(_a) * _ALFA):.3f})'
 def rgba(s):  # "rgba(r,g,b,a)" -> fill + fill-opacity
     r,g,b,a = s[5:-1].split(','); return f'fill="rgb({r},{g},{b})" fill-opacity="{a}"'
 
@@ -121,6 +128,22 @@ def maximized(prefix, st):
 
 body.append('<rect id="hint-stretch-borders" width="1" height="1" opacity="0"/>')
 body.append('<rect id="hint-compose-over-border" x="2" width="1" height="1" opacity="0"/>')
+# Cor personalizada da barra (Configurações do Vidro → Janelas): ~/.config/vidrorc [Janelas] barra=cor, cor_barra=#rrggbb
+COR_TEXTO = None
+try:
+    import configparser, re
+    _c = configparser.RawConfigParser(); _c.read(os.path.join(os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'vidrorc'))
+    _cor = os.environ.get('VIDRO_COR_BARRA') or (_c.get('Janelas', 'cor_barra', fallback='') if _c.get('Janelas', 'barra', fallback='tema') == 'cor' else '')
+    if re.fullmatch(r'#[0-9a-fA-F]{6}', _cor or ''):
+        _r, _g, _b = (int(_cor[i:i+2], 16) for i in (1, 3, 5))
+        for _k, _f in (('decoration', 1.0), ('decoration-inactive', 0.82)):
+            _a = STATES[_k]['base'][5:-1].split(',')[3]
+            STATES[_k]['base'] = f'rgba({round(_r*_f)},{round(_g*_f)},{round(_b*_f)},{_a})'
+        _lum = (0.299*_r + 0.587*_g + 0.114*_b) / 255
+        COR_TEXTO = ('28,28,32', '0,0,0,120') if _lum > 0.6 else ('235,235,240', '255,255,255,110')
+except Exception:
+    pass
+
 frame('decoration', STATES['decoration'])
 frame('decoration-inactive', STATES['decoration-inactive'])
 frame('mask', STATES['decoration'], mask=True)
@@ -162,6 +185,7 @@ rc = f'{OUT}/Vidrorc'
 if os.path.exists(rc):
     t = open(rc).read()
     act, ina = ('235,235,240', '255,255,255,110') if MODE == 'escuro' else ('28,28,32', '0,0,0,120')
+    if COR_TEXTO: act, ina = COR_TEXTO
     t = re.sub(r'^ActiveTextColor=.*$', 'ActiveTextColor=' + act, t, flags=re.M)
     t = re.sub(r'^InactiveTextColor=.*$', 'InactiveTextColor=' + ina, t, flags=re.M)
     for k, v in (('PaddingTop', PT), ('PaddingBottom', PB), ('PaddingLeft', PL), ('PaddingRight', PR)):

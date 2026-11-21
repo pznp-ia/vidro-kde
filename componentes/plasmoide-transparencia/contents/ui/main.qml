@@ -12,8 +12,8 @@ PlasmoidItem {
 
     Plasmoid.icon: "contrast"
     Plasmoid.status: PlasmaCore.Types.ActiveStatus
-    toolTipMainText: "Transparência das janelas"
-    toolTipSubText: level + "% · role o mouse para ajustar"
+    toolTipMainText: "Vidro"
+    toolTipSubText: level + "% · role o mouse para ajustar · clique direito: Configurações do Vidro"
 
     function setLevel(v) {
         v = Math.max(0, Math.min(100, Math.round(v / 5) * 5));
@@ -51,26 +51,45 @@ PlasmoidItem {
         hoverEnabled: true
     }
 
-    fullRepresentation: RowLayout {
-        // popup pequeno: só o slider e o valor
-        Layout.preferredWidth: Kirigami.Units.gridUnit * 9
-        Layout.minimumWidth: Kirigami.Units.gridUnit * 9
-        Layout.maximumWidth: Kirigami.Units.gridUnit * 9
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 2.4
-        Layout.maximumHeight: Kirigami.Units.gridUnit * 2.4
-        spacing: Kirigami.Units.smallSpacing
-        PlasmaComponents.Slider {
-            Layout.fillWidth: true
-            from: 0; to: 100; stepSize: 5
-            value: root.level
-            onMoved: root.setLevel(value)
+    function abrirConfiguracoes() { runner.connectSource("plasmawindowed org.vidro.config >/dev/null 2>&1 & #" + Date.now()); root.expanded = false }
+
+    // clique direito no ícone → "Configurações do Vidro…"
+    Plasmoid.contextualActions: [
+        PlasmaCore.Action {
+            text: "Configurações do Vidro…"
+            icon.name: "preferences-desktop-theme"
+            onTriggered: root.abrirConfiguracoes()
         }
-        PlasmaComponents.Label {
-            text: root.level + "%"
-            opacity: 0.7
-            font: Kirigami.Theme.smallFont
-            Layout.minimumWidth: Kirigami.Units.gridUnit * 1.8
-            horizontalAlignment: Text.AlignRight
+    ]
+
+    // clique esquerdo: ajuste rápido da transparência + atalho para as configurações
+    fullRepresentation: ColumnLayout {
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 13
+        Layout.minimumWidth: Kirigami.Units.gridUnit * 13
+        Layout.maximumWidth: Kirigami.Units.gridUnit * 13
+        spacing: Kirigami.Units.smallSpacing
+        RowLayout {
+            Layout.fillWidth: true
+            PlasmaComponents.Label { text: "Transparência"; opacity: 0.8 }
+            PlasmaComponents.Slider {
+                Layout.fillWidth: true
+                from: 0; to: 100; stepSize: 5
+                value: root.level
+                onMoved: root.setLevel(value)
+            }
+            PlasmaComponents.Label {
+                text: root.level + "%"
+                opacity: 0.7
+                font: Kirigami.Theme.smallFont
+                Layout.minimumWidth: Kirigami.Units.gridUnit * 1.8
+                horizontalAlignment: Text.AlignRight
+            }
+        }
+        PlasmaComponents.Button {
+            Layout.fillWidth: true
+            text: "Configurações do Vidro…"
+            icon.name: "preferences-desktop-theme"
+            onClicked: root.abrirConfiguracoes()
         }
     }
 }

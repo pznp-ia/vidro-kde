@@ -4,6 +4,12 @@ Uso: python3 -I gerar-icones.py <pasta-do-tema> <lista-places.txt> <lista-mimes.
 import os, re, sys
 OUT, PLACES, MIMES = sys.argv[1], sys.argv[2], sys.argv[3]
 GLYPH_COLOR = '#d9dae0'
+# Cores das pastas grandes (Configurações do Vidro → Ícones passa por variáveis de ambiente)
+E = os.environ.get
+PF1, PF2 = E('VIDRO_PASTA_FRENTE1', '#3a3c45'), E('VIDRO_PASTA_FRENTE2', '#1c1d22')
+PB1, PB2 = E('VIDRO_PASTA_FUNDO1', '#26272d'), E('VIDRO_PASTA_FUNDO2', '#131417')
+PGLIFO = E('VIDRO_PASTA_GLIFO', GLYPH_COLOR)
+PBRILHO = E('VIDRO_PASTA_BRILHO', '.22')
 
 # ---------- glifos (traço em caixa 16x16) ----------
 G = {
@@ -64,8 +70,8 @@ def svg(body, defs=''):
             f'<defs>{defs}</defs>{body}</svg>\n')
 
 def folder(gname=None, opened=False):
-    defs = ('<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3c45"/><stop offset="1" stop-color="#1c1d22"/></linearGradient>'
-            '<linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26272d"/><stop offset="1" stop-color="#131417"/></linearGradient>')
+    defs = (f'<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{PF1}"/><stop offset="1" stop-color="{PF2}"/></linearGradient>'
+            f'<linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{PB1}"/><stop offset="1" stop-color="{PB2}"/></linearGradient>')
     back = ('<path d="M9 9.5h13.2a3 3 0 0 1 2.4 1.2L27.4 14.5H55a5 5 0 0 1 5 5V49a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V14.5a5 5 0 0 1 5-5Z" '
             'fill="url(#b)" stroke="#fff" stroke-opacity=".07"/>')
     paper = '<rect x="9" y="17.5" width="46" height="16" rx="2" fill="#c9cbd3" fill-opacity=".75"/>'
@@ -77,9 +83,9 @@ def folder(gname=None, opened=False):
     else:
         front = ('<path d="M4 26a5 5 0 0 1 5-5H55a5 5 0 0 1 5 5V49a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z" '
                  'fill="url(#f)" stroke="#fff" stroke-opacity=".10"/>'
-                 '<path d="M9 21.6H55" stroke="#fff" stroke-opacity=".22"/>')
+                 f'<path d="M9 21.6H55" stroke="#fff" stroke-opacity="{PBRILHO}"/>')
         gx, gy = 23, 29.2
-    body = back + paper + front + (glyph(gname, gx, gy, 18, width=1.5, opacity=.95) if gname else '')
+    body = back + paper + front + (glyph(gname, gx, gy, 18, color=PGLIFO, width=1.5, opacity=.95) if gname else '')
     return svg(body, defs)
 
 def trash(full=False):
