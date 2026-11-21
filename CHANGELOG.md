@@ -1,5 +1,8 @@
 # Mudanças
 
+## v22b — 21/11/2026
+- Correção: o plugin da barra de rolagem não tinha ido para o pacote e a instalação parava no meio. O instalador agora compila ou pula essa parte se o arquivo faltar.
+
 ## v22 — 21/11/2026
 - **Atualizador:** `vidro-atualizar` (e a aba **Atualizações** no app) procura as versões publicadas no GitHub, mostra as novidades e instala por cima, mantendo as configurações e o backup de antes do Vidro. Também instala uma versão específica (`--versao`), o que serve para voltar.
 - O EditorKden só é criado se o Kdenlive (flatpak) estiver instalado.

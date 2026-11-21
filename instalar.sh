@@ -112,7 +112,9 @@ ok "app \"Configurações do Vidro\" (menu de apps, ou clique direito no widget 
 QT_SIS=$(rpm -q --qf '%{VERSION}' qt6-qtbase 2>/dev/null || pkg-config --modversion Qt6Core 2>/dev/null || true)
 QT_BIN=$(cat "$C/nativo/QT" 2>/dev/null)
 nativo_ok=0
-if [ -n "$QT_SIS" ] && [ "$(printf '%s\n%s\n' "$QT_BIN" "$QT_SIS" | sort -V | head -1)" = "$QT_BIN" ]; then
+if [ ! -f "$C/nativo/vidro-previa" ] || [ ! -f "$C/nativo/libvidroscroll.so" ]; then
+    bash "$C/nativo/compilar.sh" "$C/nativo" >/dev/null 2>&1 && nativo_ok=1
+elif [ -n "$QT_SIS" ] && [ "$(printf '%s\n%s\n' "$QT_BIN" "$QT_SIS" | sort -V | head -1)" = "$QT_BIN" ]; then
     nativo_ok=1
 elif bash "$C/nativo/compilar.sh" "$C/nativo" >/dev/null 2>&1; then
     nativo_ok=1
