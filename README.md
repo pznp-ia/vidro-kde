@@ -120,6 +120,8 @@ vidro-atualizar --versao v17  # instala uma versão específica (também serve p
 
 Ou pela aba **Atualizações** do app. A atualização mantém as suas configurações e o backup de antes do Vidro.
 
+![Aba Atualizações](docs/fotos/config-atualizacoes.jpg)
+
 ### Ligar e desligar
 
 ```bash
