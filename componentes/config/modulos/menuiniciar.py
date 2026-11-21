@@ -30,7 +30,7 @@ def _gz(path, texto):
         f.write(texto.encode())
 
 
-def _dialogo(R, op, borda, forca, S, cor=None):
+def _dialogo(R, op, borda, forca, S, cor=None, margem=None):
     """SVG 9-partes (frame + máscara de desfoque + sombra) com cantos de raio R."""
     R = max(2, R); C = R                    # tamanho dos cantos do frame
     St, Ss, Sb = max(4, round(S * 0.7)), S, max(6, round(S * 1.3))
@@ -78,7 +78,7 @@ def _dialogo(R, op, borda, forca, S, cor=None):
     grupo('center', L, L, [f'<rect {fundo} width="{L}" height="{L}"/>'])
 
     # margens do conteúdo
-    m = max(4, round(R * 0.5))
+    m = margem if margem is not None else max(4, round(R * 0.5))
     for k in ('top', 'bottom', 'left', 'right'):
         grupo(f'hint-{k}-margin', m, m, [])
 
@@ -167,8 +167,13 @@ def _recarregar():
 def aplicar(cfg):
     if not os.path.isdir(TEMA) or not os.path.isfile(os.path.join(MODELOS, 'dialogs-background.svg')):
         return
+    # o Plasma usa translucent/dialogs quando há desfoque (o normal); dialogs/ só sem efeitos
+    trans = os.path.join(TEMA, 'translucent', 'dialogs', 'background.svgz')
+    mod_trans = os.path.join(MODELOS, 'translucent-dialogs-background.svg')
     if not sim(cfg, 'ativo'):
         _gz(os.path.join(TEMA, 'dialogs', 'background.svgz'), open(os.path.join(MODELOS, 'dialogs-background.svg')).read())
+        if os.path.isfile(mod_trans) and os.path.isdir(os.path.dirname(trans)):
+            _gz(trans, open(mod_trans).read())
         _gz(os.path.join(TEMA, 'widgets', 'plasmoidheading.svgz'), open(os.path.join(MODELOS, 'plasmoidheading.svg')).read())
     else:
         R = int(num(cfg, 'raio', 2, 30, 14))
@@ -179,7 +184,10 @@ def aplicar(cfg):
         cor = cfg.get('cor_vidro', '#1c1e24') if cfg.get('fundo', 'tema') == 'cor' else None
         if cor and not re.fullmatch(r'#[0-9a-fA-F]{6}', cor):
             cor = None
-        _gz(os.path.join(TEMA, 'dialogs', 'background.svgz'), _dialogo(R, op, borda, forca, S, cor))
+        svg = _dialogo(R, op, borda, forca, S, cor)
+        _gz(os.path.join(TEMA, 'dialogs', 'background.svgz'), svg)
+        if os.path.isdir(os.path.dirname(trans)):
+            _gz(trans, svg)
         _gz(os.path.join(TEMA, 'widgets', 'plasmoidheading.svgz'),
             _cabecalho(num(cfg, 'linhas', 0, 100, 0) / 100, num(cfg, 'cabecalho', 0, 100, 0) / 100))
     _recarregar()

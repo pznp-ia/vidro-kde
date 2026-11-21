@@ -20,5 +20,5 @@ RowLayout {
         value: d.atual
         onMoved: d.app.definir(d.grupo, d.chave, Math.round(value / d.passo) * d.passo)
     }
-    QQC2.Label { text: Math.round(sl.value) + d.unidade; Layout.minimumWidth: 44; opacity: 0.75; horizontalAlignment: Text.AlignRight }
+    QQC2.Label { text: (d.passo < 1 ? sl.value.toFixed(1) : Math.round(sl.value)) + d.unidade; Layout.minimumWidth: 44; opacity: 0.75; horizontalAlignment: Text.AlignRight }
 }

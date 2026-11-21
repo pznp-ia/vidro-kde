@@ -1,5 +1,17 @@
 # Mudanças
 
+## v23 — 21/11/2026
+- **Correção:** as opções da aba "Menu iniciar e pop-ups" não mudavam nada: o Plasma usa a versão translúcida do fundo dos pop-ups e o Vidro só gravava a outra. Agora grava nas duas.
+- **Menu iniciar: tipo e opções** (aba nova): Kickoff, menu clássico ou tela cheia (troca no mesmo lugar da barra, levando as opções); favoritos e apps em grade ou lista, itens compactos, categorias à direita, trocar categoria ao passar o mouse, botões do rodapé, nomes nos botões, formato do nome dos apps, ordem alfabética, ícone e texto do botão.
+- **Barra de tarefas e relógio** (aba nova): altura, flutuante, posição, largura (tela toda ou estilo dock), alinhamento, esconder, fundo; vidro próprio da barra (cantos, opacidade, contorno, sombra, cor); ícones dos apps (espaço, agrupar, só da área atual/tela atual, som, prévias, realce, clique do meio, linhas); relógio (segundos, 12/24 h, data e formato, posição da data, negrito, tamanho).
+- As abas de menu e barra mostram os valores que você já tem: nada muda até você mexer.
+- **Botões das janelas** (aba nova): lado (esquerda/direita), ordem (macOS/Windows), botão de menu, 6 estilos (semáforo, com símbolos, grafite, contorno, só ícones, quadrados), tamanho, espaço, cor nos inativos e todos de uma cor.
+- **Ícones de arquivos** (aba nova): papel escuro, claro, colorido pelo tipo ou plano; etiqueta da extensão; cores por tipo, únicas ou cinza; canto dobrado; cantos.
+- **Ícones da lateral do Dolphin** (aba nova): linha, preenchido ou colorido por local; cor; espessura; tamanho na lateral do Dolphin.
+- **EditorKden:** visual mais limpo (abas em pílula, botões planos, ferramenta ativa na cor de destaque, barra só com ícones), opções para esconder menu e barra de status, cores dos clipes e da forma de onda, fundo do monitor; a disposição dos painéis agora é separada da do Kdenlive normal.
+- **Tela de login** (aba nova): fundo (Honeywave, seu papel de parede, outra imagem ou cor lisa), desfoque e força, escurecer, relógio (formato, segundos, tamanho, espessura, data), posição (centro/esquerda), cor de destaque, vidro dos campos, foto (mostrar, círculo ou quadrado), fonte. Botões "Testar" (abre numa janela) e "Aplicar na tela de login" (pede a senha de administrador).
+- **Estúdio do cursor** (aba nova): gera um tema de cursores completo (47 formas + atalhos com os nomes do Breeze, em SVG e Xcursor): 4 formas de seta, cores de dentro/contorno/detalhes, espessura do contorno, cantos, sombra, tamanho; modelos prontos; área para testar cada cursor; desligar volta ao cursor que você usava.
+
 ## v22b — 21/11/2026
 - Correção: o plugin da barra de rolagem não tinha ido para o pacote e a instalação parava no meio. O instalador agora compila ou pula essa parte se o arquivo faltar.
 

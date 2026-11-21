@@ -14,10 +14,10 @@ echo "Vidro — desinstalação"
 if [ -x "$BIN/vidro-config" ]; then
     RC="$CFG/vidrorc"; [ -f "$RC" ] && cp -a "$RC" "$RC.desinstalar"
     for gk in "Pastas ativo false" "Cores destaque tema" "Cores fonte tema" "Claro ativo false" \
-              "Barra ativo false" "EditorKden ativo false"; do
+              "Barra ativo false" "EditorKden ativo false" "Cursor ativo false" "Painel vidro_ativo false"; do
         set -- $gk; "$BIN/vidro-config" set "$1" "$2" "$3" >/dev/null 2>&1
     done
-    "$BIN/vidro-config" aplicar pastas cores claro barra editorkden >/dev/null 2>&1
+    "$BIN/vidro-config" aplicar pastas cores claro barra editorkden cursor painel >/dev/null 2>&1
     if [ -f "$RC.desinstalar" ]; then mv "$RC.desinstalar" "$RC"; else rm -f "$RC"; fi
 fi
 rm -f "$CFG/plasma-workspace/env/vidro-barra.sh"
@@ -37,6 +37,8 @@ rm -rf "$D/aurorae/themes/Vidro" "$D/plasma/desktoptheme/Vidro" "$D/color-scheme
        "$D"/kwin/effects/vidro_* "$D/plasma/plasmoids/org.vidro.config" "$D/color-schemes/VidroClaro.colors" \
        "$D/vidro/modulos" "$D/vidro/modelos" "$D/vidro/bin" "$D/vidro/qtplugins"
 rm -f "$D/applications/vidro-configuracoes.desktop" "$D/vidro/versao"
+rm -rf "$D/vidro/cursor" "$D/vidro/login" "$D/icons/VidroCursor"
+[ -L "$HOME/.icons/VidroCursor" ] && rm -f "$HOME/.icons/VidroCursor"
 rm -f "$BIN/vidro-tema" "$BIN/vidro-transparencia" "$BIN/vidro-cor-titulo" "$BIN/vidro-config" "$BIN/vidro-atualizar"
 kwriteconfig6 --file kwinrc --group Plugins --key vidro_opacityEnabled false
 kwriteconfig6 --file kwinrc --group Plugins --key vidro_popupsEnabled false

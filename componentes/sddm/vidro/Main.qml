@@ -15,6 +15,23 @@ Rectangle {
     color: "#101116"
 
     readonly property color texto: "#f4f6fa"
+
+    // ---- opções (theme.conf / theme.conf.user, feitas pelas Configurações do Vidro) ----
+    function opc(k, d) { const v = config[k]; return (v === undefined || v === null || String(v) === "") ? d : String(v); }
+    readonly property bool usarDesfoque: opc("useBlur", "true") === "true"
+    readonly property real escuro: Number(opc("dim", "30")) / 100          // 0 = sem escurecer
+    readonly property bool relogio12: opc("clockFormat", "24h") === "12h"
+    readonly property bool relogioSeg: opc("clockSeconds", "false") === "true"
+    readonly property real escalaRelogio: Number(opc("clockScale", "100")) / 100
+    readonly property int pesoRelogio: ({ "ExtraLight": Font.ExtraLight, "Light": Font.Light, "Normal": Font.Normal, "DemiBold": Font.DemiBold, "Bold": Font.Bold })[opc("clockWeight", "ExtraLight")] || Font.ExtraLight
+    readonly property bool mostrarData: opc("showDate", "true") === "true"
+    readonly property bool mostrarRelogio: opc("showClock", "true") === "true"
+    readonly property color destaque: opc("accent", "#ffffff")
+    readonly property real vidro: Number(opc("glass", "8")) / 100              // opacidade das pílulas
+    readonly property bool aEsquerda: opc("layout", "centro") === "esquerda"
+    readonly property bool mostrarAvatar: opc("showAvatar", "true") === "true"
+    readonly property bool avatarQuadrado: opc("avatarShape", "circulo") === "quadrado"
+    readonly property string fonte: opc("font", "Noto Sans")
     readonly property real u: Math.max(12, Math.min(width, height) / 60)   // unidade base
     property int usuarioAtual: userModel.lastIndex >= 0 ? userModel.lastIndex : 0
     property int sessaoAtual: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
@@ -85,7 +102,7 @@ Rectangle {
     // ---------------- fundo ----------------
     Image {
         anchors.fill: parent
-        source: config.backgroundBlur ? config.backgroundBlur : config.background
+        source: (raiz.usarDesfoque && config.backgroundBlur) ? config.backgroundBlur : config.background
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
         smooth: true
@@ -93,9 +110,9 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.34) }
-            GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, 0.20) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.42) }
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, raiz.escuro * 1.13) }
+            GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, raiz.escuro * 0.67) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Math.min(0.95, raiz.escuro * 1.4)) }
         }
     }
 
@@ -124,7 +141,9 @@ Rectangle {
         // ---------------- relógio ----------------
         Column {
             id: relogio
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenter: raiz.aEsquerda ? undefined : parent.horizontalCenter
+            x: raiz.aEsquerda ? raiz.width * 0.08 : 0
+            visible: raiz.mostrarRelogio
             opacity: raiz.tecladoAberto ? 0 : 1
             Behavior on opacity { NumberAnimation { duration: 200 } }
             y: Math.round(raiz.height * 0.10)
@@ -132,16 +151,17 @@ Rectangle {
             property date agora: new Date()
             Timer { interval: 1000; running: true; repeat: true; onTriggered: relogio.agora = new Date() }
             Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: Qt.formatTime(relogio.agora, "HH:mm")
+                anchors.horizontalCenter: raiz.aEsquerda ? undefined : parent.horizontalCenter
+                text: Qt.formatTime(relogio.agora, (raiz.relogio12 ? "h:mm" : "HH:mm") + (raiz.relogioSeg ? ":ss" : "") + (raiz.relogio12 ? " AP" : ""))
                 color: raiz.texto
-                font.family: "Noto Sans"
-                font.pixelSize: raiz.u * 7.2
-                font.weight: Font.ExtraLight
+                font.family: raiz.fonte
+                font.pixelSize: raiz.u * 7.2 * raiz.escalaRelogio
+                font.weight: raiz.pesoRelogio
                 font.letterSpacing: -2
             }
             Text {
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: raiz.aEsquerda ? undefined : parent.horizontalCenter
+                visible: raiz.mostrarData
                 text: {
                     const d = relogio.agora;
                     const dias = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -149,7 +169,7 @@ Rectangle {
                     return dias[d.getDay()] + ", " + d.getDate() + " de " + meses[d.getMonth()];
                 }
                 color: Qt.rgba(0.96, 0.97, 0.98, 0.72)
-                font.family: "Noto Sans"
+                font.family: raiz.fonte
                 font.pixelSize: raiz.u * 1.25
                 font.letterSpacing: 0.6
             }
@@ -158,7 +178,8 @@ Rectangle {
         // ---------------- avatar + nome + senha ----------------
         Column {
             id: bloco
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenter: raiz.aEsquerda ? undefined : parent.horizontalCenter
+            x: raiz.aEsquerda ? raiz.width * 0.08 : 0
             anchors.verticalCenter: parent.verticalCenter
             anchors.verticalCenterOffset: raiz.u * 0.6
             spacing: 0
@@ -167,12 +188,13 @@ Rectangle {
             Item {
                 id: caixaAvatar
                 anchors.horizontalCenter: parent.horizontalCenter
+                visible: raiz.mostrarAvatar
                 width: raiz.u * 6
                 height: width
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: -6
-                    radius: width / 2
+                    radius: raiz.avatarQuadrado ? width * 0.24 : width / 2
                     color: Qt.rgba(1, 1, 1, 0.06)
                     border.width: 1
                     border.color: Qt.rgba(1, 1, 1, 0.20)
@@ -186,7 +208,7 @@ Rectangle {
                     visible: false
                     layer.enabled: true
                 }
-                Rectangle { id: mascara; anchors.fill: parent; radius: width / 2; visible: false; layer.enabled: true }
+                Rectangle { id: mascara; anchors.fill: parent; radius: raiz.avatarQuadrado ? width * 0.22 : width / 2; visible: false; layer.enabled: true }
                 MultiEffect {
                     anchors.fill: parent
                     source: face
@@ -204,7 +226,7 @@ Rectangle {
                 }
             }
 
-            Item { width: 1; height: raiz.u * 1.1 }
+            Item { width: 1; height: raiz.mostrarAvatar ? raiz.u * 1.1 : 0 }
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -214,7 +236,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: raiz.nomeExibido
                     color: raiz.texto
-                    font.family: "Noto Sans"
+                    font.family: raiz.fonte
                     font.pixelSize: raiz.u * 1.6
                     font.weight: Font.Light
                     font.letterSpacing: 0.4
@@ -231,7 +253,7 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 text: raiz.mensagem.length > 0 ? raiz.mensagem : (keyboard.capsLock ? "Caps Lock ativado" : "")
                 color: Qt.rgba(1, 0.86, 0.78, 0.92)
-                font.family: "Noto Sans"
+                font.family: raiz.fonte
                 font.pixelSize: raiz.u * 0.85
                 opacity: text.length > 0 ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 250 } }
@@ -256,7 +278,7 @@ Rectangle {
                     placeholderTextColor: Qt.rgba(1, 1, 1, 0.45)
                     color: raiz.texto
                     selectionColor: Qt.rgba(1, 1, 1, 0.3)
-                    font.family: "Noto Sans"
+                    font.family: raiz.fonte
                     font.pixelSize: raiz.u * 1.0
                     leftPadding: raiz.u * 1.1
                     rightPadding: raiz.u * 1.1
@@ -264,9 +286,9 @@ Rectangle {
                     inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
                     background: Rectangle {
                         radius: height / 2
-                        color: Qt.rgba(1, 1, 1, senha.activeFocus ? 0.12 : 0.08)
+                        color: Qt.rgba(1, 1, 1, senha.activeFocus ? raiz.vidro + 0.04 : raiz.vidro)
                         border.width: 1
-                        border.color: Qt.rgba(1, 1, 1, senha.activeFocus ? 0.34 : 0.16)
+                        border.color: senha.activeFocus ? Qt.rgba(raiz.destaque.r, raiz.destaque.g, raiz.destaque.b, 0.55) : Qt.rgba(1, 1, 1, 0.16)
                         Behavior on color { ColorAnimation { duration: 250 } }
                     }
                     onAccepted: raiz.entrar()
@@ -309,7 +331,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: raiz.nomeSessao(raiz.sessaoAtual) + "   ⌄"
                 color: Qt.rgba(1, 1, 1, 0.8)
-                font.family: "Noto Sans"
+                font.family: raiz.fonte
                 font.pixelSize: raiz.u * 0.85
                 font.letterSpacing: 0.3
             }
@@ -359,7 +381,8 @@ Rectangle {
         signal clicked()
         height: width
         radius: width / 2
-        color: Qt.rgba(1, 1, 1, ma.pressed ? 0.24 : (ma.containsMouse ? 0.16 : (destaque ? 0.13 : 0.07)))
+        color: destaque ? Qt.rgba(raiz.destaque.r, raiz.destaque.g, raiz.destaque.b, ma.pressed ? 0.5 : (ma.containsMouse ? 0.4 : 0.3))
+                        : Qt.rgba(1, 1, 1, ma.pressed ? 0.24 : (ma.containsMouse ? 0.16 : raiz.vidro * 0.9))
         border.width: 1
         border.color: Qt.rgba(1, 1, 1, ma.containsMouse ? 0.30 : 0.15)
         scale: ma.pressed ? 0.94 : 1
@@ -380,7 +403,7 @@ Rectangle {
             visible: bv.dica.length > 0
             opacity: ma.containsMouse ? 0.85 : 0
             color: raiz.texto
-            font.family: "Noto Sans"
+            font.family: raiz.fonte
             font.pixelSize: raiz.u * 0.7
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }

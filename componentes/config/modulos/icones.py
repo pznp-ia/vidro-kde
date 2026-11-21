@@ -12,6 +12,18 @@ PADROES = {
     'brilho': '50',        # 0 escuro … 100 claro
     'relevo': '45',        # diferença entre topo e base da pasta (degradê)
     'saturacao': '60',     # 0 cinza … 100 cor viva (modos destaque/cor)
+    # arquivos (documentos)
+    'doc_estilo': 'escuro',   # escuro | claro | colorido | plano
+    'doc_rotulo': 'true',     # etiqueta com a extensão
+    'doc_cores': 'tipo',      # tipo | unica | cinza
+    'doc_cor': '#58a6ff',
+    'doc_dobra': 'true',      # canto dobrado
+    'doc_raio': '3',
+    # barra lateral (Dolphin e diálogos)
+    'lado_estilo': 'linha',   # linha | preenchido | colorido
+    'lado_cor': '#d9dae0',
+    'lado_traco': '1.3',
+    'lado_tamanho': 'auto',   # tamanho dos ícones na lateral do Dolphin: auto | 16 | 22 | 32
 }
 
 DATA = os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
@@ -67,6 +79,18 @@ def aplicar(cfg):
         f1, f2, b1, b2, gl = _cores(cfg)
         env.update(VIDRO_PASTA_FRENTE1=f1, VIDRO_PASTA_FRENTE2=f2, VIDRO_PASTA_FUNDO1=b1,
                    VIDRO_PASTA_FUNDO2=b2, VIDRO_PASTA_GLIFO=gl)
+    env.update(VIDRO_DOC_ESTILO=cfg.get('doc_estilo', 'escuro'),
+               VIDRO_DOC_ROTULO='1' if sim(cfg, 'doc_rotulo') else '0',
+               VIDRO_DOC_CORES=cfg.get('doc_cores', 'tipo'), VIDRO_DOC_COR=cfg.get('doc_cor', '#58a6ff'),
+               VIDRO_DOC_DOBRA='1' if sim(cfg, 'doc_dobra') else '0', VIDRO_DOC_RAIO=str(num(cfg, 'doc_raio', 0, 10, 3)),
+               VIDRO_LADO_ESTILO=cfg.get('lado_estilo', 'linha'), VIDRO_LADO_COR=cfg.get('lado_cor', '#d9dae0'),
+               VIDRO_LADO_TRACO=str(num(cfg, 'lado_traco', 0.8, 2.2, 1.3)))
+    tam = cfg.get('lado_tamanho', 'auto')
+    if tam == 'auto':
+        subprocess.run(['kwriteconfig6', '--file', 'dolphinrc', '--group', 'PlacesPanel', '--key', 'IconSize', '--delete'], capture_output=True)
+    else:
+        subprocess.run(['kwriteconfig6', '--file', 'dolphinrc', '--group', 'PlacesPanel', '--key', 'IconSize',
+                        str(int(num(cfg, 'lado_tamanho', 16, 48, 22)))], capture_output=True)
     subprocess.run(['python3', '-I', os.path.join(fonte, 'gerar-icones.py'), TEMA,
                     os.path.join(fonte, 'places.txt'), os.path.join(fonte, 'mimes.txt')], env=env, capture_output=True)
     # os apps só relêem os ícones quando o tema muda: troca e volta

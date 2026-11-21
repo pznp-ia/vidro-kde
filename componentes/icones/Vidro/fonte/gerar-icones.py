@@ -10,6 +10,22 @@ PF1, PF2 = E('VIDRO_PASTA_FRENTE1', '#3a3c45'), E('VIDRO_PASTA_FRENTE2', '#1c1d2
 PB1, PB2 = E('VIDRO_PASTA_FUNDO1', '#26272d'), E('VIDRO_PASTA_FUNDO2', '#131417')
 PGLIFO = E('VIDRO_PASTA_GLIFO', GLYPH_COLOR)
 PBRILHO = E('VIDRO_PASTA_BRILHO', '.22')
+# Documentos (Configurações do Vidro → Ícones de arquivos)
+DOC_ESTILO = E('VIDRO_DOC_ESTILO', 'escuro')       # escuro | claro | colorido | plano
+DOC_ROTULO = E('VIDRO_DOC_ROTULO', '1') == '1'     # etiqueta com a extensão (PDF, PNG…)
+DOC_CORES = E('VIDRO_DOC_CORES', 'tipo')           # tipo (cor por tipo) | unica | cinza
+DOC_COR = E('VIDRO_DOC_COR', '#58a6ff')            # cor quando DOC_CORES = unica
+DOC_DOBRA = E('VIDRO_DOC_DOBRA', '1') == '1'       # canto dobrado
+try: DOC_RAIO = max(0.0, min(10.0, float(E('VIDRO_DOC_RAIO', '3'))))
+except ValueError: DOC_RAIO = 3.0
+# Barra lateral (ícones pequenos de 16/22 px: Dolphin, diálogos de abrir/salvar)
+LADO_ESTILO = E('VIDRO_LADO_ESTILO', 'linha')      # linha | preenchido | colorido
+LADO_COR = E('VIDRO_LADO_COR', GLYPH_COLOR)
+try: LADO_TRACO = max(0.8, min(2.2, float(E('VIDRO_LADO_TRACO', '1.3'))))
+except ValueError: LADO_TRACO = 1.3
+LADO_CORES = {'home': '#5b8def', 'desktop': '#a371f7', 'documents': '#58a6ff', 'download': '#3fb950', 'music': '#f778ba',
+              'pictures': '#39c5cf', 'video': '#bc8cff', 'templates': '#d29922', 'share': '#f0883e', 'games': '#e5534b',
+              'recent': '#d29922', 'network': '#39c5cf', 'trash': '#8b949e', 'cloud': '#58a6ff', 'git': '#f0883e', None: '#8b949e'}
 
 # ---------- glifos (traço em caixa 16x16) ----------
 G = {
@@ -146,12 +162,28 @@ def label(n, cat):
     if cat == 'font': return 'FONT'
     return ''
 
+def _mix(a, b, t):
+    a = [int(a[i:i+2], 16) for i in (1, 3, 5)]; b = [int(b[i:i+2], 16) for i in (1, 3, 5)]
+    return '#%02x%02x%02x' % tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
 def document(n):
-    cat = classify(n); col = CAT_COLORS[cat]; lab = label(n, cat)
-    defs = ('<linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#363841"/><stop offset="1" stop-color="#1b1c21"/></linearGradient>')
-    body = ('<path d="M15 4h22.5L51 17.5V57a3 3 0 0 1-3 3H15a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z" fill="url(#p)" stroke="#fff" stroke-opacity=".12"/>'
-            '<path d="M37.5 4v10.5a3 3 0 0 0 3 3H51Z" fill="#555865"/>'
-            '<path d="M15.5 5.2H37" stroke="#fff" stroke-opacity=".14"/>')
+    cat = classify(n); lab = label(n, cat)
+    col = CAT_COLORS[cat] if DOC_CORES == 'tipo' else DOC_COR if DOC_CORES == 'unica' else '#9da5b4'
+    r = DOC_RAIO
+    if DOC_ESTILO == 'claro': c1, c2, dob, borda = '#f6f7f9', '#dcdfe5', '#b9bdc7', '#000'
+    elif DOC_ESTILO == 'colorido': c1, c2, dob, borda = _mix(col, '#2a2c33', .55), _mix(col, '#15161a', .78), _mix(col, '#ffffff', .25), '#fff'
+    elif DOC_ESTILO == 'plano': c1 = c2 = '#2c2e35'; dob, borda = '#4a4d57', '#fff'
+    else: c1, c2, dob, borda = '#363841', '#1b1c21', '#555865', '#fff'
+    defs = (f'<linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{c1}"/><stop offset="1" stop-color="{c2}"/></linearGradient>')
+    if DOC_DOBRA:
+        contorno = f'M{12+r} 4h25.5L51 17.5V{60-r}a{r} {r} 0 0 1-{r} {r}H{12+r}a{r} {r} 0 0 1-{r}-{r}V{4+r}a{r} {r} 0 0 1 {r}-{r}Z'
+    else:
+        contorno = f'M{12+r} 4H{51-r}a{r} {r} 0 0 1 {r} {r}V{60-r}a{r} {r} 0 0 1-{r} {r}H{12+r}a{r} {r} 0 0 1-{r}-{r}V{4+r}a{r} {r} 0 0 1 {r}-{r}Z'
+    body = f'<path d="{contorno}" fill="url(#p)" stroke="{borda}" stroke-opacity=".12"/>'
+    if DOC_DOBRA:
+        body += f'<path d="M37.5 4v10.5a3 3 0 0 0 3 3H51Z" fill="{dob}"/>'
+    if DOC_ESTILO != 'claro':
+        body += f'<path d="M{12+r+.5} 5.2H37" stroke="#fff" stroke-opacity=".14"/>'
     g = DOC_GLYPH.get(cat)
     if cat in ('text', 'doc', 'generic') and not g:
         body += '<path d="M20 26h20M20 32h22M20 38h16" stroke="#d9dae0" stroke-opacity=".5" stroke-width="2.2" stroke-linecap="round"/>'
@@ -167,13 +199,16 @@ def document(n):
         body += glyph(g, 22, 22, 19, width=1.5, opacity=.75)
     # faixa de acento discreta + rótulo
     body += f'<rect x="12" y="47" width="39" height="0" />'
-    if lab:
+    if DOC_ESTILO == 'claro': col = _mix(col, '#000000', .3)
+    if lab and DOC_ROTULO:
         fs = 9 if len(lab) <= 3 else 7.5 if len(lab) == 4 else 6.5
         body += (f'<rect x="17" y="45" width="29" height="10" rx="3" fill="{col}" fill-opacity=".22"/>'
                  f'<text x="31.5" y="{50 + fs*0.36:.1f}" font-family="sans-serif" font-weight="700" font-size="{fs}" '
                  f'text-anchor="middle" fill="{col}" fill-opacity=".95" letter-spacing=".4">{lab}</text>')
     else:
         body += f'<rect x="24" y="49" width="15" height="3" rx="1.5" fill="{col}" fill-opacity=".8"/>'
+    if DOC_ESTILO == 'claro':
+        body = body.replace('#d9dae0', '#3a3d45')
     return svg(body, defs)
 
 # ---------- montagem ----------
@@ -224,9 +259,20 @@ def small(name):
             rest = re.sub(r'folder|director(y)?|^user-|inode-|gnome-fs-|open|visiting|drag-accept|accept|[-_]', ' ', base)
             for rx, gname in FOLDER_RULES:
                 if re.search(rx, rest): g = gname; break
-        inner = G[g].replace('{c}', GLYPH_COLOR) if g else FOLDER_OUTLINE
+        inner = G[g] if g else FOLDER_OUTLINE
+    return lado_svg(inner, 'trash' if inner is TRASH_SMALL else g)
+
+def lado_svg(inner, g):
+    """Ícone pequeno da barra lateral no estilo escolhido."""
+    cor = LADO_CORES.get(g, LADO_CORES[None]) if LADO_ESTILO == 'colorido' else LADO_COR
+    if LADO_ESTILO == 'preenchido':
+        tinta = '#16171b'
+        return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+                f'<rect x=".5" y=".5" width="15" height="15" rx="4" fill="{cor}" fill-opacity=".92"/>'
+                f'<g transform="translate(8 8) scale(.68) translate(-8 -8)" fill="none" stroke="{tinta}" stroke-width="{LADO_TRACO * 1.35:.2f}" '
+                f'stroke-linecap="round" stroke-linejoin="round">{inner.replace("{c}", tinta)}</g></svg>\n')
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
-            f'<g fill="none" stroke="{GLYPH_COLOR}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">{inner}</g></svg>\n')
+            f'<g fill="none" stroke="{cor}" stroke-width="{LADO_TRACO}" stroke-linecap="round" stroke-linejoin="round">{inner.replace("{c}", cor)}</g></svg>\n')
 n16 = 0
 for d in ('16/places', '22/places'):
     os.makedirs(f'{OUT}/{d}', exist_ok=True)
@@ -241,8 +287,7 @@ print('pequenos:', n16)
 # itens da barra lateral que não são pastas (só nas versões pequenas)
 SIDEBAR_EXTRA = {'document-open-recent': 'recent', 'network-workgroup': 'network'}
 for n, g in SIDEBAR_EXTRA.items():
-    s = ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
-         f'<g fill="none" stroke="{GLYPH_COLOR}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">{G[g].replace("{c}", GLYPH_COLOR)}</g></svg>\n')
+    s = lado_svg(G[g], g)
     for d in ('16/places', '22/places'):
         open(f'{OUT}/{d}/{n}.svg', 'w').write(s)
 print('extras barra lateral:', len(SIDEBAR_EXTRA))

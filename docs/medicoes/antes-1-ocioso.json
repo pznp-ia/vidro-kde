@@ -1,0 +1,378 @@
+{
+ "rotulo": "antes",
+ "ativo": false,
+ "segundos": 40.0,
+ "media": {
+  "cpu_total": 5.46223566426447,
+  "cpu_kwin_wayland": 18.397460499904103,
+  "cpu_plasmashell": 17.50981079718543,
+  "cpu_Xwayland": 0.07400677899306891,
+  "cpu_vidro-previa": 0.1232445857506939,
+  "gpu": 47.575,
+  "potencia_w": 17.1192,
+  "rss_kwin_mb": 369,
+  "rss_plasmashell_mb": 505
+ },
+ "amostras": [
+  {
+   "cpu_total": 4.151404151404147,
+   "cpu_kwin_wayland": 16.754398480375432,
+   "cpu_plasmashell": 16.754398480375432,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 18.908
+  },
+  {
+   "cpu_total": 4.278728606356963,
+   "cpu_kwin_wayland": 17.747111413984392,
+   "cpu_plasmashell": 17.747111413984392,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 17.89
+  },
+  {
+   "cpu_total": 3.8555691554467586,
+   "cpu_kwin_wayland": 15.774564934553604,
+   "cpu_plasmashell": 17.746385551372807,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 16.814
+  },
+  {
+   "cpu_total": 4.273504273504269,
+   "cpu_kwin_wayland": 16.778384565136772,
+   "cpu_plasmashell": 18.752312161035217,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 27.949
+  },
+  {
+   "cpu_total": 4.092852779474654,
+   "cpu_kwin_wayland": 16.7649085847566,
+   "cpu_plasmashell": 16.7649085847566,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 8.417
+  },
+  {
+   "cpu_total": 9.285277947464877,
+   "cpu_kwin_wayland": 15.80327218753628,
+   "cpu_plasmashell": 16.790976699257296,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 14.219
+  },
+  {
+   "cpu_total": 12.095296273671352,
+   "cpu_kwin_wayland": 18.73469591179444,
+   "cpu_plasmashell": 17.74865928485789,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 3.9441465077461975,
+   "gpu": 49,
+   "potencia_w": 15.576
+  },
+  {
+   "cpu_total": 10.542352224253504,
+   "cpu_kwin_wayland": 16.78967196133979,
+   "cpu_plasmashell": 16.78967196133979,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 29.33
+  },
+  {
+   "cpu_total": 10.442260442260443,
+   "cpu_kwin_wayland": 16.746670073785417,
+   "cpu_plasmashell": 17.731768313419852,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 26.807
+  },
+  {
+   "cpu_total": 5.35931790499391,
+   "cpu_kwin_wayland": 19.701960165373613,
+   "cpu_plasmashell": 21.672156181910974,
+   "cpu_Xwayland": 0.9850980082686807,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 49,
+   "potencia_w": 12.028
+  },
+  {
+   "cpu_total": 5.1001821493624755,
+   "cpu_kwin_wayland": 19.712738445631164,
+   "cpu_plasmashell": 17.74146460106805,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.9856369222815582,
+   "gpu": 49,
+   "potencia_w": 8.696
+  },
+  {
+   "cpu_total": 6.487148102815176,
+   "cpu_kwin_wayland": 21.72475681845364,
+   "cpu_plasmashell": 19.749778925866945,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 48,
+   "potencia_w": 35.832
+  },
+  {
+   "cpu_total": 4.289215686274506,
+   "cpu_kwin_wayland": 21.656576580636198,
+   "cpu_plasmashell": 16.734627357764335,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 12.016
+  },
+  {
+   "cpu_total": 4.4512195121951255,
+   "cpu_kwin_wayland": 19.72984675667698,
+   "cpu_plasmashell": 17.75686208100928,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 10.984
+  },
+  {
+   "cpu_total": 4.278728606356963,
+   "cpu_kwin_wayland": 22.681716492745043,
+   "cpu_plasmashell": 17.7509085595396,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 8.997
+  },
+  {
+   "cpu_total": 4.464831804281344,
+   "cpu_kwin_wayland": 20.719555406573633,
+   "cpu_plasmashell": 18.74626441547138,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 16.319
+  },
+  {
+   "cpu_total": 4.353157572041688,
+   "cpu_kwin_wayland": 17.75447768810617,
+   "cpu_plasmashell": 17.75447768810617,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 15.591
+  },
+  {
+   "cpu_total": 3.9804041641151255,
+   "cpu_kwin_wayland": 19.730450030047475,
+   "cpu_plasmashell": 16.770882525540355,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 13.553
+  },
+  {
+   "cpu_total": 3.9901780233271955,
+   "cpu_kwin_wayland": 20.72039376104324,
+   "cpu_plasmashell": 18.747022926658172,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 14.15
+  },
+  {
+   "cpu_total": 4.217603911980438,
+   "cpu_kwin_wayland": 20.720876333041936,
+   "cpu_plasmashell": 16.774042745795853,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 14.218
+  },
+  {
+   "cpu_total": 3.8013488657265504,
+   "cpu_kwin_wayland": 17.76230139376388,
+   "cpu_plasmashell": 17.76230139376388,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 33.05
+  },
+  {
+   "cpu_total": 4.281345565749239,
+   "cpu_kwin_wayland": 18.754836517199276,
+   "cpu_plasmashell": 15.793546540799392,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 14.787
+  },
+  {
+   "cpu_total": 3.619631901840492,
+   "cpu_kwin_wayland": 19.73078880742283,
+   "cpu_plasmashell": 16.771170486309405,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 17.734
+  },
+  {
+   "cpu_total": 3.985285101164926,
+   "cpu_kwin_wayland": 16.744829529709598,
+   "cpu_plasmashell": 16.744829529709598,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 14.465
+  },
+  {
+   "cpu_total": 4.151404151404147,
+   "cpu_kwin_wayland": 18.74625118616972,
+   "cpu_plasmashell": 17.75960638689763,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 14.263
+  },
+  {
+   "cpu_total": 3.8674033149171283,
+   "cpu_kwin_wayland": 18.749739958736903,
+   "cpu_plasmashell": 17.762911539856013,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 18.749
+  },
+  {
+   "cpu_total": 4.105392156862742,
+   "cpu_kwin_wayland": 18.80831616336838,
+   "cpu_plasmashell": 16.828493409329603,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 20.551
+  },
+  {
+   "cpu_total": 4.174340085942296,
+   "cpu_kwin_wayland": 18.719486906282036,
+   "cpu_plasmashell": 16.749014600357608,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 7.979
+  },
+  {
+   "cpu_total": 3.7851037851037828,
+   "cpu_kwin_wayland": 17.742127519172715,
+   "cpu_plasmashell": 16.756453768107562,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 8.044
+  },
+  {
+   "cpu_total": 4.095354523227379,
+   "cpu_kwin_wayland": 16.776383101921294,
+   "cpu_plasmashell": 17.763229166740192,
+   "cpu_Xwayland": 0.9868460648188996,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 9.628
+  },
+  {
+   "cpu_total": 4.039167686658507,
+   "cpu_kwin_wayland": 18.70392503763468,
+   "cpu_plasmashell": 15.750673715902888,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 17.264
+  },
+  {
+   "cpu_total": 4.215027489309708,
+   "cpu_kwin_wayland": 16.774445256336485,
+   "cpu_plasmashell": 18.747909404140774,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 12.294
+  },
+  {
+   "cpu_total": 4.159021406727826,
+   "cpu_kwin_wayland": 18.731190721533174,
+   "cpu_plasmashell": 18.731190721533174,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 16.816
+  },
+  {
+   "cpu_total": 4.110429447852759,
+   "cpu_kwin_wayland": 17.760972590490482,
+   "cpu_plasmashell": 17.760972590490482,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 18.045
+  },
+  {
+   "cpu_total": 4.276114844227241,
+   "cpu_kwin_wayland": 18.736819039136954,
+   "cpu_plasmashell": 19.722967409617848,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 18.211
+  },
+  {
+   "cpu_total": 6.989576946658493,
+   "cpu_kwin_wayland": 19.766541732703526,
+   "cpu_plasmashell": 17.789887559433176,
+   "cpu_Xwayland": 0.9883270866351763,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 16.007
+  },
+  {
+   "cpu_total": 10.2328431372549,
+   "cpu_kwin_wayland": 15.80519642016015,
+   "cpu_plasmashell": 15.80519642016015,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 22.256
+  },
+  {
+   "cpu_total": 9.631901840490798,
+   "cpu_kwin_wayland": 14.826799896307119,
+   "cpu_plasmashell": 15.815253222727595,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 30.29
+  },
+  {
+   "cpu_total": 10.5456774984672,
+   "cpu_kwin_wayland": 16.788316039546146,
+   "cpu_plasmashell": 15.800768037219903,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 17.483
+  },
+  {
+   "cpu_total": 6.4338235294117645,
+   "cpu_kwin_wayland": 18.72212558697689,
+   "cpu_plasmashell": 16.751375525189847,
+   "cpu_Xwayland": 0.0,
+   "cpu_vidro-previa": 0.0,
+   "gpu": 47,
+   "potencia_w": 18.558
+  }
+ ]
+}

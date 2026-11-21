@@ -45,6 +45,11 @@ def modulos():
 
 def grupo(c, m):
     d = dict(getattr(m, 'PADROES', {}))
+    if hasattr(m, 'atual'):          # módulos que leem o estado de agora do sistema (painel, menu...)
+        try:
+            d.update({k: v for k, v in (m.atual() or {}).items() if k in d})
+        except Exception as e:
+            print(f'{getattr(m, "GRUPO", "?")}: não consegui ler o estado atual ({e})', file=sys.stderr)
     g = getattr(m, 'GRUPO', None)
     if g and c.has_section(g):
         d.update(dict(c.items(g)))

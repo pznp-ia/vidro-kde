@@ -101,6 +101,8 @@ copia "$C/config/plasmoide" "$D/plasma/plasmoids/org.vidro.config"
 mkdir -p "$D/vidro" "$D/applications"
 copia "$C/config/modulos" "$D/vidro/modulos"
 copia "$C/config/modelos" "$D/vidro/modelos"
+copia "$C/config/cursor" "$D/vidro/cursor"            # estúdio do cursor
+copia "$C/sddm/vidro" "$D/vidro/login/base"           # base para a aba "Tela de login"
 copia "$C/VidroClaro.colors" "$D/color-schemes/VidroClaro.colors"
 cp "$C/config/vidro-configuracoes.desktop" "$D/applications/"
 echo "$VERSAO" > "$D/vidro/versao"

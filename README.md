@@ -33,6 +33,12 @@
 | **Dolphin** | linhas entre as partes | sem linhas de separação, área de arquivos na cor da interface |
 | **Versão clara** *(teste)* | — | as mesmas transparências com cores claras |
 | **EditorKden** | — | atalho para o Kdenlive com visual minimalista (só se o Kdenlive flatpak estiver instalado; o Kdenlive normal não muda) |
+| **Botões das janelas** | à direita | lado, ordem, 6 estilos (semáforo, símbolos, grafite, contorno, só ícones, quadrados), tamanho e cores |
+| **Menu iniciar: tipo** | Kickoff | Kickoff, menu clássico ou tela cheia, com grade/lista, compacto, rodapé, ícone e texto do botão |
+| **Barra de tarefas e relógio** | — | altura, flutuante, estilo dock, esconder, vidro próprio da barra, ícones dos apps e formato do relógio |
+| **Ícones de arquivos e da lateral** | — | papel escuro/claro/colorido/plano, etiquetas, cantos; lateral do Dolphin em linha, preenchida ou colorida |
+| **Tela de login** | — | fundo, desfoque, relógio, posição, cores e foto ajustáveis, com teste numa janela |
+| **Estúdio do cursor** | cursor do sistema | gera um tema de cursores completo com a forma, as cores, o contorno e a sombra que você escolher |
 | **Atualizações** | — | `vidro-atualizar` (ou a aba no app) baixa as versões novas daqui do GitHub |
 
 ### Sombras

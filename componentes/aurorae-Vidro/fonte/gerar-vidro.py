@@ -1,4 +1,4 @@
-import os, sys, math
+import os, sys, math, re, configparser
 OUT = sys.argv[1]
 MODE = sys.argv[2] if len(sys.argv) > 2 else 'escuro'   # 'escuro' ou 'claro'
 os.makedirs(OUT, exist_ok=True)
@@ -154,29 +154,80 @@ def svg(w, h, d, b):
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}"><defs>{"".join(d)}</defs>{"".join(b)}</svg>\n'
 open(f'{OUT}/decoration.svg','w').write(svg(ox[0], T+60, defs, body))
 
-# ---------- botões estilo semáforo ----------
-BW = 20; RAD = 6.5
+# ---------- botões ----------
+# Estilo vem de ~/.config/vidrorc [Botoes] (Configurações do Vidro → Botões das janelas):
+#   estilo  = semaforo | simbolos (semáforo com símbolos sempre) | grafite (cinza, cor ao passar o mouse)
+#             | contorno (só o anel) | icones (só o símbolo) | quadrado (quadrado arredondado)
+#   tamanho = raio do botão (4-9), inativos = cinza | cor, cor_unica = vazio ou #rrggbb (todos da mesma cor)
+BOT = {}
+try:
+    _b = configparser.RawConfigParser(); _b.read(os.path.join(os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'vidrorc'))
+    if _b.has_section('Botoes'): BOT = dict(_b.items('Botoes'))
+except Exception:
+    pass
+ESTILO = BOT.get('estilo', 'semaforo')
+try: RAD = max(4.0, min(9.0, float(BOT.get('tamanho', '6.5'))))
+except ValueError: RAD = 6.5
+INATIVOS_COR = BOT.get('inativos', 'cinza') == 'cor'
+BW = 20
 COL = {'close': ('#ff5f57', '#e0443e', '#bf2f28'), 'minimize': ('#febc2e', '#dea123', '#b5801a'), 'maximize': ('#28c840', '#1aab29', '#128a1f')}
+_unica = BOT.get('cor_unica', '') if BOT.get('cor', 'semaforo') == 'unica' else ''
+if re.fullmatch(r'#[0-9a-fA-F]{6}', _unica or ''):
+    _r, _g, _b2 = (int(_unica[i:i+2], 16) for i in (1, 3, 5))
+    _esc = lambda f: '#%02x%02x%02x' % (round(_r*f), round(_g*f), round(_b2*f))
+    for k in COL: COL[k] = (_unica, _esc(0.85), _esc(0.7))
 COL['restore'] = COL['maximize']
-GLYPH = {
-  'close':    '<path d="M7.6,7.6 L12.4,12.4 M12.4,7.6 L7.6,12.4" stroke="#4d0000" stroke-opacity="0.75" stroke-width="1.3" stroke-linecap="round" fill="none"/>',
-  'minimize': '<path d="M7,10 H13" stroke="#5a3a00" stroke-opacity="0.8" stroke-width="1.4" stroke-linecap="round" fill="none"/>',
-  'maximize': '<path d="M7.3,12.7 V8.6 L11.4,12.7 Z M12.7,7.3 V11.4 L8.6,7.3 Z" fill="#0a4a10" fill-opacity="0.8"/>',
-  'restore':  '<path d="M9.6,10.4 H6.6 L9.6,13.4 Z M10.4,9.6 V6.6 L13.4,9.6 Z" fill="#0a4a10" fill-opacity="0.8"/>',
+CLARO = MODE == 'claro' or (COR_TEXTO is not None and COR_TEXTO[0].startswith('28'))
+TINTA = '#1c1c20' if CLARO else '#ececf0'        # símbolo sem círculo colorido
+def _k(sc):  # escala os símbolos (desenhados para raio 6.5) ao tamanho do botão
+    f = RAD / 6.5
+    return f'<g transform="translate(10,10) scale({f:.3f}) translate(-10,-10)">{sc}</g>'
+GLYPH_D = {
+  'close':    ('M7.6,7.6 L12.4,12.4 M12.4,7.6 L7.6,12.4', 'stroke'),
+  'minimize': ('M7,10 H13', 'stroke'),
+  'maximize': ('M7.3,12.7 V8.6 L11.4,12.7 Z M12.7,7.3 V11.4 L8.6,7.3 Z', 'fill'),
+  'restore':  ('M9.6,10.4 H6.6 L9.6,13.4 Z M10.4,9.6 V6.6 L13.4,9.6 Z', 'fill'),
 }
+if ESTILO == 'icones':  # símbolos no estilo Windows/GNOME: quadrado para maximizar
+    GLYPH_D['maximize'] = ('M7.2,7.2 H12.8 V12.8 H7.2 Z', 'stroke')
+    GLYPH_D['restore'] = ('M6.8,8.8 H11.2 V13.2 H6.8 Z M8.8,8.8 V6.8 H13.2 V11.2 H11.2', 'stroke')
+ESCURO_GLIFO = {'close': '#4d0000', 'minimize': '#5a3a00', 'maximize': '#0a4a10', 'restore': '#0a4a10'}
+def glifo(name, cor, op=0.8, larg=1.3):
+    d, modo = GLYPH_D[name]
+    if modo == 'stroke':
+        return _k(f'<path d="{d}" stroke="{cor}" stroke-opacity="{op}" stroke-width="{larg}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>')
+    return _k(f'<path d="{d}" fill="{cor}" fill-opacity="{op}"/>')
+def forma(fill, extra=''):
+    if ESTILO == 'quadrado':
+        q = RAD * 2; return f'<rect x="{10-RAD}" y="{10-RAD}" width="{q}" height="{q}" rx="{RAD*0.38:.2f}" fill="{fill}" {extra}/>'
+    return f'<circle cx="10" cy="10" r="{RAD}" fill="{fill}" {extra}/>'
 for name, (c, ring, press) in COL.items():
-    d = [f'<radialGradient id="shine" cx="10" cy="7" r="7" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>']
-    def btn(id_, x, fill, glyph=False, inactive=False):
+    d = [f'<radialGradient id="shine" cx="10" cy="{10-RAD*0.45:.2f}" r="{RAD+0.5}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>']
+    def btn(id_, x, fill, hover=False, inactive=False, pressed=False):
         g = f'<g id="{id_}-center" transform="translate({x},0)"><rect width="{BW}" height="{BW}" fill="#000" opacity="0"/>'
-        if inactive:
-            g += f'<circle cx="10" cy="10" r="{RAD}" fill="{INACT_BTN[0]}" fill-opacity="{INACT_BTN[1]}" stroke="#000" stroke-opacity="{INACT_BTN[2]}" stroke-width="0.6"/>'
+        cinza = inactive and not INATIVOS_COR
+        if ESTILO == 'icones':
+            if hover or pressed:
+                g += forma(c if name == 'close' else ('#000' if CLARO else '#fff'), f'fill-opacity="{0.9 if name == "close" else 0.14}"')
+            g += glifo(name, ('#fff' if (name == 'close' and (hover or pressed)) else TINTA), 0.45 if cinza else 0.9, 1.4)
+        elif ESTILO == 'contorno':
+            cor = (INACT_BTN[0] if cinza else fill)
+            if hover or pressed: g += forma(fill)
+            else: g += forma('none', f'stroke="{cor}" stroke-opacity="{0.45 if cinza else 1}" stroke-width="1.4"').replace(f'r="{RAD}"', f'r="{RAD-0.7}"')
+            if hover or pressed: g += glifo(name, ESCURO_GLIFO[name])
+        elif ESTILO == 'grafite' and not (hover or pressed):
+            g += forma('#000' if CLARO else '#fff', f'fill-opacity="{0.12 if cinza else 0.28}" stroke="#000" stroke-opacity="0.3" stroke-width="0.6"')
+            g += glifo(name, TINTA, 0.35 if cinza else 0.75)
+        elif cinza:
+            g += forma(INACT_BTN[0], f'fill-opacity="{INACT_BTN[1]}" stroke="#000" stroke-opacity="{INACT_BTN[2]}" stroke-width="0.6"')
+            if ESTILO == 'simbolos': g += glifo(name, TINTA, 0.35)
         else:
-            g += f'<circle cx="10" cy="10" r="{RAD}" fill="{fill}" stroke="{ring}" stroke-width="0.6"/><circle cx="10" cy="10" r="{RAD}" fill="url(#shine)"/>'
-            if glyph: g += GLYPH[name]
+            g += forma(fill, f'stroke="{ring}" stroke-width="0.6"') + forma('url(#shine)')
+            if hover or pressed or ESTILO == 'simbolos': g += glifo(name, ESCURO_GLIFO[name])
         return g + '</g>'
-    b = [btn('active', 0, c), btn('hover', 30, c, True), btn('pressed', 60, press, True),
+    b = [btn('active', 0, c), btn('hover', 30, c, hover=True), btn('pressed', 60, press, pressed=True),
          btn('inactive', 90, c, inactive=True), btn('deactivated', 120, c, inactive=True),
-         btn('hover-inactive', 150, c, True), btn('pressed-inactive', 180, press, True)]
+         btn('hover-inactive', 150, c, hover=True), btn('pressed-inactive', 180, press, pressed=True)]
     open(f'{OUT}/{name}.svg','w').write(svg(200, BW, d, b))
 print('ok', OUT)
 
@@ -188,6 +239,16 @@ if os.path.exists(rc):
     if COR_TEXTO: act, ina = COR_TEXTO
     t = re.sub(r'^ActiveTextColor=.*$', 'ActiveTextColor=' + act, t, flags=re.M)
     t = re.sub(r'^InactiveTextColor=.*$', 'InactiveTextColor=' + ina, t, flags=re.M)
+    _esq = _dir = None
+    if True:  # sem [Botoes] no vidrorc = padrão do Vidro (esquerda, fechar-minimizar-maximizar)
+        _seq = 'XIA' if BOT.get('ordem', 'macos') == 'macos' else 'IAX'
+        _menu = 'M' if BOT.get('menu', 'false') == 'true' else ''
+        if BOT.get('posicao', 'esquerda') == 'esquerda': _esq, _dir = _seq, _menu
+        else: _esq, _dir = _menu, _seq
+    if _esq is not None: t = re.sub(r'^LeftButtons=.*$', 'LeftButtons=' + _esq, t, flags=re.M)
+    if _dir is not None: t = re.sub(r'^RightButtons=.*$', 'RightButtons=' + _dir, t, flags=re.M)
+    try: t = re.sub(r'^ButtonSpacing=.*$', 'ButtonSpacing=%d' % max(0, min(12, int(float(BOT.get('espaco', '2'))))), t, flags=re.M)
+    except ValueError: pass
     for k, v in (('PaddingTop', PT), ('PaddingBottom', PB), ('PaddingLeft', PL), ('PaddingRight', PR)):
         t = re.sub(rf'^{k}=.*$', f'{k}={v}', t, flags=re.M)
     open(rc, 'w').write(t)
