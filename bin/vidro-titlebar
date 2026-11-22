@@ -22,7 +22,11 @@ if [ -d "$img" ]; then img=$(find "$img" -type f \( -iname '*.jpg' -o -iname '*.
 BLUR=~/.cache/vidro/blurred-wallpaper.jpg; mkdir -p ~/.cache/vidro
 if [ "$1" = "--force" ] || [ ! -f "$BLUR" ] || [ "$(cat ~/.cache/vidro/wallpaper.src 2>/dev/null)" != "$img" ]; then
   magick "$img" -resize 1280x -blur 0x28 -modulate 92,135 -quality 88 "$BLUR.tmp" 2>/dev/null && mv "$BLUR.tmp" "$BLUR" && echo "$img" > ~/.cache/vidro/wallpaper.src
+  rm -f ~/.cache/vidro/wallpaper.jpg
 fi
+# sharp copy: background of the previews in Vidro Settings
+SHARP=~/.cache/vidro/wallpaper.jpg
+[ -f "$SHARP" ] || { magick "$img" -resize '1600x>' -quality 88 "$SHARP.tmp" 2>/dev/null && mv "$SHARP.tmp" "$SHARP"; }
 # mean brightness (0-1), weighting the top half, where titlebars usually are
 lum=$(magick "$img" -resize 200x200! -colorspace Gray \( +clone -crop 200x100+0+0 \) -delete 0 -format '%[fx:mean]' info: 2>/dev/null)
 [ -n "$lum" ] || exit 0

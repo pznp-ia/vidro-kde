@@ -11,7 +11,8 @@ Item {
     readonly property bool selClara: (0.299 * sel.r + 0.587 * sel.g + 0.114 * sel.b) > 0.62
     readonly property color fontName: U.v(app, "Colors", "text", "theme") === "custom" ? U.color(U.v(app, "Colors", "text_color", "#fcfcfc")) : "#fcfcfc"
     readonly property color secundaria: U.v(app, "Colors", "text", "theme") === "custom" ? U.mix(fontName, background, U.n(app, "Colors", "secondary", 41) / 100) : "#a1a9b1"
-    Rectangle { anchors.fill: parent; color: r.background }
+    Backdrop { anchors.fill: parent; app: r.app }
+    Rectangle { anchors.fill: parent; color: Qt.alpha(r.background, 0.84) }
     Column {
         anchors.centerIn: parent; width: parent.width * 0.7; spacing: 4
         Repeater {

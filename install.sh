@@ -213,6 +213,7 @@ rm -rf "$D/vidro/modulos" "$D/vidro/modelos"   # Portuguese folders of older ver
 put "$C/settings/modules"   "$D/vidro/modules"
 put "$C/settings/templates" "$D/vidro/templates"
 put "$C/settings/cursor"    "$D/vidro/cursor"
+put "$C/settings/sounds"    "$D/vidro/sounds"
 put "$C/sddm/vidro"         "$D/vidro/login/base"
 cp "$C/settings/vidro-settings.desktop" "$D/applications/"
 rm -f "$D/applications/vidro-configuracoes.desktop"
@@ -229,7 +230,9 @@ fi
 if want native; then
     progress 58 "Barra de rolagem sobreposta…"
     # built with the Qt in components/native/QT; Qt does not load a plugin built with a newer version
-    QT_SYS=$(rpm -q --qf '%{VERSION}' qt6-qtbase 2>/dev/null || pkg-config --modversion Qt6Core 2>/dev/null || true)
+    QT_SYS=$( (qtpaths6 --qt-version || /usr/lib/qt6/bin/qtpaths --qt-version || /usr/lib64/qt6/bin/qtpaths --qt-version \
+               || /usr/lib/x86_64-linux-gnu/qt6/bin/qtpaths --qt-version || rpm -q --qf '%{VERSION}' qt6-qtbase \
+               || pkg-config --modversion Qt6Core) 2>/dev/null | head -1 | grep -E '^6\.' || true)
     QT_BUILT=$(cat "$C/native/QT" 2>/dev/null)
     native_ok=0
     if [ -n "$QT_SYS" ] && [ -f "$C/native/libvidroscroll.so" ] \
@@ -242,6 +245,7 @@ if want native; then
         mkdir -p "$D/vidro/bin" "$D/vidro/qtplugins/styles"
         install -m 755 "$C/native/vidro-preview" "$D/vidro/bin/vidro-preview"
         ln -sfn vidro-preview "$D/vidro/bin/vidro-previa"
+        [ -f "$C/native/vidro-login-preview" ] && install -m 755 "$C/native/vidro-login-preview" "$D/vidro/bin/vidro-login-preview"
         install -m 755 "$C/native/libvidroscroll.so" "$D/vidro/qtplugins/styles/libvidroscroll.so"
         ok "barra de rolagem por cima do conteúdo e janela de prévia"
     else

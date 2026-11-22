@@ -1,0 +1,20 @@
+# Maintainer: Vidro <https://github.com/pznp-ia/vidro-kde>
+# Installs the Vidro files system-wide; each user then runs `vidro-kde-install` (per-user, no root).
+pkgname=vidro-kde
+pkgver=25
+pkgrel=1
+pkgdesc="Glassy translucent look for KDE Plasma 6 with a settings app (decoration, effects, login/lock, cursor, sounds)"
+arch=('x86_64')
+url="https://github.com/pznp-ia/vidro-kde"
+license=('GPL-3.0-or-later')
+depends=('plasma-workspace' 'kwin' 'python' 'python-pillow' 'imagemagick' 'ffmpeg' 'pipewire' 'kconfig' 'qt6-tools' 'qt6-multimedia')
+optdepends=('kate: NotepadK' 'cmake: build native parts' 'qt6-base: build native parts')
+source=("$pkgname-v$pkgver.tar.gz::https://github.com/pznp-ia/vidro-kde/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+package() {
+    cd "$srcdir/vidro-kde-$pkgver"
+    install -d "$pkgdir/usr/share/vidro-kde"
+    cp -a . "$pkgdir/usr/share/vidro-kde/"
+    rm -rf "$pkgdir/usr/share/vidro-kde/.git"
+    install -Dm755 packaging/vidro-kde-install "$pkgdir/usr/bin/vidro-kde-install"
+}

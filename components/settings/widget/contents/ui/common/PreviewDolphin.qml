@@ -11,7 +11,8 @@ Item {
     readonly property color base: (active && U.v(app, "Dolphin", "background", "interface") === "custom") ? U.color(U.v(app, "Dolphin", "background_color", "#25282d")) : win
     readonly property color area: (active && (U.b(app, "Dolphin", "unify", true) || U.v(app, "Dolphin", "background", "interface") === "custom"))
         ? U.mix(base, "#141518", U.n(app, "Dolphin", "darken", 0) / 100) : "#141518"
-    Rectangle { anchors.fill: parent; color: r.win }
+    Backdrop { anchors.fill: parent; app: r.app }
+    Rectangle { anchors.fill: parent; color: Qt.alpha(r.win, 0.84) }
     Rectangle { width: parent.width; height: 34; color: r.win
         Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.18 * r.lines) }
         Rectangle { x: parent.width * 0.3; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.5; height: 20; radius: 6; color: Qt.rgba(0, 0, 0, 0.25) } }

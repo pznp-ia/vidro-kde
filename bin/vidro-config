@@ -28,6 +28,13 @@ def load():
             pass
     c = configparser.RawConfigParser(); c.optionxform = str
     c.read(CONFIG_FILE)
+    # repair values broken across lines (e.g. a stray tab line becomes a continuation)
+    for g in c.sections():
+        for k, v in list(c.items(g)):
+            if not k.strip():
+                c.remove_option(g, k)
+            elif '\n' in v:
+                c.set(g, k, v.split('\n')[0].strip())
     return c
 
 
@@ -78,7 +85,7 @@ def main(a):
                 print(m.DEFAULTS[key]); return 0
         return 1
     if cmd == 'set' and len(a) >= 4:
-        group, key, value = a[1], a[2], a[3]
+        group, key, value = a[1].strip(), a[2].strip(), a[3].replace('\r', '').split('\n')[0].strip()
         if not c.has_section(group):
             c.add_section(group)
         c.set(group, key, value)

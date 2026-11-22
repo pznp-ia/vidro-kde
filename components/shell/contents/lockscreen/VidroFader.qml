@@ -15,6 +15,7 @@ Item {
     property Item footer
     property Item source
     property bool alwaysShowClock: false
+    property bool blurOn: true
 
     readonly property int duracao: Kirigami.Units.veryLongDuration * 1.6   // ~400-500 ms
     property real fator: 0          // 0 = idle, 1 = card open
@@ -31,7 +32,7 @@ Item {
         blur: 1.0
         saturation: 0.15
         brightness: -0.10
-        opacity: fader.fator
+        opacity: fader.blurOn ? fader.fator : 0
         visible: opacity > 0.001
     }
 

@@ -28,9 +28,9 @@ Rectangle {
     readonly property bool showClock: opt("showClock", "true") === "true"
     readonly property color accent: opt("accent", "#ffffff")
     readonly property real glass: Number(opt("glass", "8")) / 100              // opacity of the pills
-    readonly property bool alignLeft: opt("layout", "centro") === "esquerda"
+    readonly property bool alignLeft: ["left", "esquerda"].indexOf(opt("layout", "center")) >= 0
     readonly property bool showAvatar: opt("showAvatar", "true") === "true"
-    readonly property bool squareAvatar: opt("avatarShape", "circulo") === "quadrado"
+    readonly property bool squareAvatar: ["square", "quadrado"].indexOf(opt("avatarShape", "circle")) >= 0
     readonly property string fontFamily: opt("font", "Noto Sans")
     readonly property real u: Math.max(12, Math.min(width, height) / 60)   // unidade base
     property int currentUser: userModel.lastIndex >= 0 ? userModel.lastIndex : 0
@@ -106,6 +106,18 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
         smooth: true
+    }
+    // video background (theme option "video"); the photo above stays as poster/fallback
+    Loader {
+        anchors.fill: parent
+        active: root.opt("video", "") !== ""
+        source: "VideoBackground.qml"
+        onLoaded: {
+            item.source = Qt.resolvedUrl(root.opt("video", ""));
+            item.speed = Number(root.opt("videoSpeed", "100")) / 100;
+            item.blurred = root.useBlur;
+            item.blurAmount = Math.min(1, Number(root.opt("blurStrength", "28")) / 60);
+        }
     }
     Rectangle {
         anchors.fill: parent
@@ -187,7 +199,7 @@ Rectangle {
 
             Item {
                 id: avatarBox
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: root.alignLeft ? undefined : parent.horizontalCenter
                 visible: root.showAvatar
                 width: root.u * 6
                 height: width
@@ -229,7 +241,7 @@ Rectangle {
             Item { width: 1; height: root.showAvatar ? root.u * 1.1 : 0 }
 
             Row {
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: root.alignLeft ? undefined : parent.horizontalCenter
                 spacing: root.u
                 ArrowButton { textColor: "‹"; visible: userModel.count > 1; onClicked: root.currentUser = (root.currentUser - 1 + userModel.count) % userModel.count }
                 Text {
@@ -248,7 +260,7 @@ Rectangle {
 
             Text {
                 id: notice
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: root.alignLeft ? undefined : parent.horizontalCenter
                 height: root.u * 1.6
                 verticalAlignment: Text.AlignVCenter
                 text: root.message.length > 0 ? root.message : (keyboard.capsLock ? "Caps Lock ativado" : "")
@@ -261,11 +273,12 @@ Rectangle {
 
             Row {
                 id: passwordRow
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: root.alignLeft ? undefined : parent.horizontalCenter
                 spacing: root.u * 0.5
                 property real alt: root.u * 2.5
+                transform: Translate { id: shakeX }
                 // spacer: keeps the pill centered
-                Item { width: passwordRow.alt; height: 1 }
+                Item { width: root.alignLeft ? 0 : passwordRow.alt; height: 1 }
 
                 TextField {
                     id: password
@@ -296,10 +309,10 @@ Rectangle {
                     SequentialAnimation {
                         id: shake
                         loops: 1
-                        NumberAnimation { target: passwordRow; property: "anchors.horizontalCenterOffset"; to: -root.u * 0.6; duration: 60 }
-                        NumberAnimation { target: passwordRow; property: "anchors.horizontalCenterOffset"; to: root.u * 0.6; duration: 90 }
-                        NumberAnimation { target: passwordRow; property: "anchors.horizontalCenterOffset"; to: -root.u * 0.35; duration: 80 }
-                        NumberAnimation { target: passwordRow; property: "anchors.horizontalCenterOffset"; to: 0; duration: 90; easing.type: Easing.OutCubic }
+                        NumberAnimation { target: shakeX; property: "x"; to: -root.u * 0.6; duration: 60 }
+                        NumberAnimation { target: shakeX; property: "x"; to: root.u * 0.6; duration: 90 }
+                        NumberAnimation { target: shakeX; property: "x"; to: -root.u * 0.35; duration: 80 }
+                        NumberAnimation { target: shakeX; property: "x"; to: 0; duration: 90; easing.type: Easing.OutCubic }
                     }
                 }
 

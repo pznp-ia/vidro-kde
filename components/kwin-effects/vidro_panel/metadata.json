@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "Appearance",
+        "Description": "Vidro: animation when an auto-hiding panel appears and disappears",
+        "Description[pt_BR]": "Vidro: animação ao aparecer e sumir da barra de tarefas (ocultar automaticamente)",
+        "EnabledByDefault": false,
+        "Id": "vidro_panel",
+        "License": "GPL",
+        "Name": "Vidro: taskbar show/hide",
+        "Name[pt_BR]": "Vidro: aparecer/sumir da barra"
+    },
+    "X-KDE-Ordering": 60,
+    "X-Plasma-API": "javascript"
+}

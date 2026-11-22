@@ -1,186 +1,286 @@
 # Vidro
 
-**Um visual de vidro escuro e translúcido para o KDE Plasma 6** — janelas com cantos arredondados e botões no estilo semáforo, sombras suaves, efeitos de abrir, maximizar e minimizar, ícones de pastas minimalistas, telas de bloqueio, de sair e de login combinando, e um bloco de notas sem distrações (NotepadK).
+**Um visual de vidro translúcido para o KDE Plasma 6 — e um app para ajustar cada detalhe dele.**
 
-*Code and commands are in English; the interface and docs are in Brazilian Portuguese. A glassy, translucent dark look for KDE Plasma 6 — window decoration, shadows, KWin effects, icons, lock/logout/login screens and a distraction-free notepad. English summary at the end.*
+Janelas com cantos arredondados e botões no estilo semáforo, sombras suaves, animações próprias, ícones minimalistas, telas de login e de bloqueio combinando (com foto, papel de parede ou **vídeo**), estúdio de cursores, sons do sistema, NotepadK (um bloco de notas sem distrações) — e tudo isso com liga/desliga e controles deslizantes no app **Configurações do Vidro**, cada aba com um exemplo que muda na hora.
+
+*Code and commands are in English; the interface and docs are in Brazilian Portuguese. [English summary at the end.](#english-summary)*
 
 ![Área de trabalho com o Vidro: Dolphin e NotepadK](docs/images/area-de-trabalho.jpg)
 
+## Instalação rápida
+
+**Pelo terminal** (baixa a versão mais nova e abre o instalador com janela para escolher os extras):
+
+```bash
+bash <(curl -fsSL https://github.com/pznp-ia/vidro-kde/releases/latest/download/install-vidro.sh)
+```
+
+Tudo de uma vez, sem perguntas: `bash <(curl -fsSL https://github.com/pznp-ia/vidro-kde/releases/latest/download/install-vidro.sh) --all`
+
+**Pela interface (sem terminal):**
+1. Baixe o **[install-vidro.sh](https://github.com/pznp-ia/vidro-kde/releases/latest/download/install-vidro.sh)**;
+2. no Dolphin: clique direito nele → **Propriedades → Permissões → marque "É executável"**;
+3. clique duas vezes nele → **Executar**. Abre a janela do instalador.
+
+Depois: **saia e entre de novo** na sessão. Para atualizar: `vidro-update` ou a aba **Atualizações** do app. Outras formas (pacotes .deb/.rpm, Arch, código-fonte): [Instalar](#instalar).
+
 ---
 
-## O que muda no seu Plasma
+## Sumário
 
-| Parte | Como era (Breeze) | Com o Vidro |
-|---|---|---|
-| **Decoração das janelas** | barra cinza, botões à direita | vidro escuro translúcido, cantos de 12 px, botões fechar/minimizar/maximizar coloridos **à esquerda** |
-| **Sombras** | sombra do Breeze | sombra própria, suave e um pouco caída para baixo, sem emendas nos cantos |
-| **Cor da barra de título** | fixa | muda sozinha entre escura e clara conforme o brilho do papel de parede |
-| **Transparência das janelas** | opaca | ajustável de 0 a 100 por um widget no painel (100 = janela ativa com 75 %, inativas com 60 %) |
-| **Maximizar e minimizar** | efeitos padrão | maximizar sem "piscar" a barra de título; minimizar faz a janela **viajar até o próprio ícone** na barra de tarefas |
-| **Menus e popups** | deslizam | aparecem com um fade curto |
-| **Painel** | opaco ou adaptativo | translúcido |
-| **Estilo do Plasma e cores** | Breeze | "Vidro", baseado no Breeze, com painel e diálogos translúcidos |
-| **Estilo dos apps** | Breeze | "vidro" para o [Union](https://invent.kde.org/plasma/union): cantos de 8 px e bordas finas (se o Union estiver instalado) |
-| **Ícones** | Breeze | pastas e documentos escuros com desenho de linha; ícones de apps continuam coloridos (Tela, se você tiver, ou Breeze) |
-| **Tela de bloqueio e de sair** | Breeze | relógio fino, campo de senha de vidro, fundo desfocado do seu papel de parede (Plasma 6.8) |
-| **Login (SDDM)** | Breeze | tela de login de vidro (opcional, precisa de `sudo`) |
-| **NotepadK** | — | bloco de notas feito sobre o Kate: a janela vira um bloco só da cor do texto, e a interface completa aparece com um clique |
-| **Configurações do Vidro** | — | app com uma aba por recurso, cada uma com um exemplo que muda na hora: liga/desliga e ajusta tudo abaixo |
-| **Barra de rolagem** | Breeze | fina, de vidro, **por cima do conteúdo** e some quando parada (como no macOS); estilos vidro, neon fino ou cor escolhida |
-| **Menus (clique direito)** | Breeze | cantos, opacidade, espaçamento, realce e animação de abrir/fechar ajustáveis |
-| **Menu iniciar e pop-ups do painel** | Breeze | fundo de vidro com cantos, contorno e sombra ajustáveis |
-| **Cores** | do esquema | cor de destaque e cor da fonte personalizáveis; cores das pastas (grafite, destaque ou qualquer cor) |
-| **Dolphin** | linhas entre as partes | sem linhas de separação, área de arquivos na cor da interface |
-| **Versão clara** *(teste)* | — | as mesmas transparências com cores claras |
-| **EditorKden** | — | atalho para o Kdenlive com visual minimalista (só se o Kdenlive flatpak estiver instalado; o Kdenlive normal não muda) |
-| **Botões das janelas** | à direita | lado, ordem, 6 estilos (semáforo, símbolos, grafite, contorno, só ícones, quadrados), tamanho e cores |
-| **Menu iniciar: tipo** | Kickoff | Kickoff, menu clássico ou tela cheia, com grade/lista, compacto, rodapé, ícone e texto do botão |
-| **Barra de tarefas e relógio** | — | altura, flutuante, estilo dock, esconder, vidro próprio da barra, ícones dos apps e formato do relógio |
-| **Ícones de arquivos e da lateral** | — | papel escuro/claro/colorido/plano, etiquetas, cantos; lateral do Dolphin em linha, preenchida ou colorida |
-| **Tela de login** | — | fundo, desfoque, relógio, posição, cores e foto ajustáveis, com teste numa janela |
-| **Estúdio do cursor** | cursor do sistema | gera um tema de cursores completo com a forma, as cores, o contorno e a sombra que você escolher |
-| **Animações** | do KDE | abrir, fechar, minimizar, maximizar, mostrar área de trabalho e menus: estilo, duração e curva de cada uma |
-| **Estilo dos aplicativos** | — | estúdio para botões, campos, caixas de seleção, abas, listas e foco de todos os apps do KDE |
-| **Perfis** | — | salve o visual inteiro e volte a ele; exporte para compartilhar |
-| **Clima** | widget do KDE | widget de clima leve, que só redesenha quando chegam dados novos |
-| **NotepadK** | — | fonte, cores, espaçamento e transição do modo foco |
-| **Atualizações** | — | `vidro-update` (ou a aba no app) baixa as versões novas daqui do GitHub |
+- [Instalação rápida](#instalação-rápida)
+- [Configurações do Vidro (o app)](#configurações-do-vidro)
+- [Tudo o que dá para ajustar](#tudo-o-que-dá-para-ajustar)
+  - [Geral](#geral) · [Janelas](#janelas) · [Aplicativos](#aplicativos) · [Área de trabalho](#área-de-trabalho) · [Sistema](#sistema)
+- [Instalar](#instalar) · [Atualizar](#atualizar) · [Linha de comando](#linha-de-comando) · [Desinstalar](#desinstalar)
+- [Observações](#observações) · [Problemas conhecidos](#problemas-conhecidos) · [Licença](#licença)
 
-### Sombras
+---
 
-A sombra é desenhada pelo próprio tema com um perfil gaussiano (o mesmo de um desfoque de verdade), então as laterais e os cantos se encaixam sem emenda e sem aquela faixa escura dura embaixo.
+## Configurações do Vidro
 
-![Sombra antes e depois](docs/images/sombras-antes-depois.jpg)
+Abra pelo menu de apps (**Configurações do Vidro**) ou com o **clique direito no widget** de transparência. A lateral é dividida em grupos — Geral, Janelas, Aplicativos, Área de trabalho e Sistema — e cada aba tem:
 
-![Canto da janela de perto](docs/images/sombra-canto.jpg)
-
-### Configurações do Vidro
-
-Abra pelo menu de apps (**Configurações do Vidro**) ou com o **clique direito no widget** de transparência. Cada aba tem um exemplo desenhado que muda na hora em que você mexe; os apps já abertos pegam as mudanças de estilo quando são reabertos.
+- um **exemplo desenhado em cima do seu papel de parede**, que muda na hora em que você mexe;
+- um **liga/desliga** do recurso e **controles deslizantes** para as medidas;
+- valores que começam iguais ao que você já tem: nada muda até você mexer.
 
 ![Todas as abas das Configurações do Vidro](docs/images/config-todas-as-abas.jpg)
+
+As configurações ficam em `~/.config/vidrorc`; também dá para usar o terminal ([veja abaixo](#linha-de-comando)).
+
+---
+
+## Tudo o que dá para ajustar
+
+### Geral
+
+| Aba | O que tem |
+|---|---|
+| **Perfis** | Salvar o visual inteiro com um nome, carregar (o visual de agora é guardado antes como "auto-…"), apagar, **exportar e importar** para compartilhar. |
+
+### Janelas
+
+| Aba | O que tem |
+|---|---|
+| **Janelas** | Decoração de vidro (Aurorae) com cantos arredondados; transparência da janela ativa e das inativas; cor da barra de título que **acompanha o brilho do papel de parede** (escura ou clara); sombra gaussiana suave, sem emendas. |
+| **Botões das janelas** | Lado (esquerda/direita), ordem (macOS/Windows), botão de menu, **6 estilos** (semáforo, com símbolos, grafite, contorno, só ícones, quadrados), tamanho, espaço, uma cor para cada botão, cor nos inativos, quando mostrar os símbolos, espessura e efeito ao passar o mouse. |
+| **Animações** | Abrir, fechar, minimizar (a janela **viaja até o ícone**), maximizar e mostrar área de trabalho — cada uma com estilo e duração; curva (suave, ágil, mola) e velocidade geral do KDE. Botão "Testar" no exemplo. |
+
+| | |
+|---|---|
+| ![Animações](docs/images/settings-animations.jpg) | ![Botões](docs/images/settings-buttons-studio.jpg) |
+| **Animações** | **Estúdio dos botões** |
+
+### Aplicativos
+
+| Aba | O que tem |
+|---|---|
+| **Estilo dos aplicativos** | Estúdio para os apps do KDE (estilo [Union](https://invent.kde.org/plasma/union)): botões (vidro, planos, contorno, preenchidos), campos, caixas de seleção, abas, seleção nas listas, foco, cantos e espaçamento. |
+| **Barra de rolagem** | Fina, de vidro, **por cima do conteúdo** e some quando parada (como no macOS); estilos vidro, neon fino ou cor escolhida; largura, tempo para sumir. |
+| **Menus (clique direito)** | Cantos, opacidade, espaçamento, realce e animação de abrir/fechar. |
+| **Cores** | Cor de destaque e cor da fonte. |
+| **Dolphin** | Sem linhas entre as partes, área de arquivos na cor da interface. |
+| **Versão clara** *(teste)* | As mesmas transparências com cores claras. |
+| **EditorKden** | Atalho para o Kdenlive (flatpak) com visual minimalista: abas em pílula, botões planos, ferramenta ativa na cor de destaque; esconder menu/barra de status; cores dos clipes e da forma de onda. O Kdenlive normal não muda. |
+| **NotepadK** | Veja [NotepadK](#notepadk) abaixo. |
 
 | | |
 |---|---|
 | ![Barra de rolagem](docs/images/config-barra-de-rolagem.jpg) | ![Menus](docs/images/config-menus.jpg) |
-| **Barra de rolagem:** por cima do conteúdo, some quando parada | **Menus:** cantos, fundo, realce e animação |
-| ![Menu iniciar](docs/images/config-menu-iniciar.jpg) | ![Cores das pastas](docs/images/config-cores-das-pastas.jpg) |
-| **Menu iniciar e pop-ups do painel** | **Cores das pastas** |
-| ![Cores](docs/images/config-cores-destaque-fonte.jpg) | ![Dolphin](docs/images/config-dolphin.jpg) |
-| **Cor de destaque e da fonte** | **Dolphin sem linhas de separação** |
+| **Barra de rolagem** | **Menus** |
+| ![Estilo dos aplicativos](docs/images/settings-app-style.jpg) | ![Dolphin](docs/images/config-dolphin.jpg) |
+| **Estilo dos aplicativos** | **Dolphin** |
+
+#### NotepadK
+
+Um bloco de notas feito sobre o Kate. No **modo foco** a janela vira só a folha — sem barras, menus nem números de linha — com uma faixa invisível no topo para arrastar (clique duplo maximiza). **Ctrl+Shift+Espaço** (ou o botão no canto) traz a interface completa com uma transição suave. O seu Kate normal não muda.
+
+- **Texto:** fonte, tamanho, cores (automático claro/escuro, Breeze, Nord, Dracula, Monokai, Solarized, GitHub), espaço entre linhas, quebra de linha.
+- **Bloco de texto:** margens dos lados e em cima/embaixo, **coluna centralizada** (largura em letras), destaque leve da linha atual, **rolagem de máquina de escrever** (o cursor fica perto do meio), contador de palavras discreto.
+- **Janela:** opacidade, barra de título no modo foco, sempre no topo, botão flutuante e sua opacidade.
+- **Animações:** troca foco ↔ interface por esmaecer, deslizar, zoom ou nenhuma; curva (suave, rápida, elástica, linear); duração; o texto aparece suavemente ao abrir.
 
 | | |
 |---|---|
-| ![Animações](docs/images/settings-animations.jpg) | ![Estilo dos aplicativos](docs/images/settings-app-style.jpg) |
-| **Animações:** estilo, duração e curva | **Estilo dos aplicativos** |
-| ![Botões](docs/images/settings-buttons-studio.jpg) | ![Perfis](docs/images/settings-profiles.jpg) |
-| **Estúdio dos botões das janelas** | **Perfis** |
+| ![NotepadK: modo foco e interface completa](docs/images/notepadk.jpg) | ![NotepadK: coluna centralizada e contador](docs/images/settings-notepadk-text-block.jpg) |
+| **Modo foco e interface completa** | **Coluna centralizada, linha atual e contador de palavras** |
 
-O Dolphin com pastas na cor de destaque, sem linhas entre as partes e com a barra de rolagem fina:
+### Área de trabalho
 
-![Dolphin com o Vidro](docs/images/dolphin-pastas.jpg)
+| Aba | O que tem |
+|---|---|
+| **Menu iniciar: tipo e opções** | Kickoff, menu clássico ou tela cheia (troca no mesmo lugar); grade ou lista, compacto, categorias à direita, trocar categoria ao passar o mouse, rodapé, nomes nos botões, formato do nome, ordem alfabética, ícone e texto do botão. |
+| **Menu iniciar e pop-ups do painel** | Fundo de vidro com cantos, opacidade, contorno, sombra; animação própria (sobe direto, opaco). |
+| **Barra de tarefas e relógio** | Altura, flutuante, posição, largura (tela toda ou estilo dock), alinhamento, esconder; **vidro próprio da barra** (cantos, opacidade, contorno, sombra, cor); ícones dos apps (espaço, agrupar, só da área atual, som, prévias, realce, clique do meio, linhas); relógio (segundos, 12/24 h, data e formato, negrito, tamanho); ícone do "mostrar área de trabalho". |
+| **Barra: aparecer e sumir** | Animação da barra quando ela se esconde sozinha: estilo ao **aparecer** e ao **sumir** (deslizar da borda, esmaecer, deslizar + esmaecer, encolher/crescer, subir crescendo, nenhuma), duração de cada um, curva, distância do deslize e tamanho inicial. |
+| **Ícones de arquivos** | Papel escuro, claro, colorido pelo tipo ou plano; etiqueta da extensão; canto dobrado; cantos. |
+| **Ícones da lateral (Dolphin)** | Linha, preenchido ou colorido por local; cor, espessura, tamanho. |
+| **Pastas** | Grafite, cor de destaque ou qualquer cor. |
+| **Estúdio do cursor** | Veja [Estúdio do cursor](#estúdio-do-cursor). |
+| **Mouse** | Veja [Mouse](#mouse). |
+| **Tela de login** | Veja [Telas de login e de bloqueio](#telas-de-login-e-de-bloqueio). |
 
-As configurações ficam em `~/.config/vidrorc` e também podem ser mudadas pelo terminal:
+| | |
+|---|---|
+| ![Menu iniciar](docs/images/config-menu-iniciar.jpg) | ![Barra aparecer e sumir](docs/images/settings-panel-animation.jpg) |
+| **Menu iniciar e pop-ups** | **Barra: aparecer e sumir** (exemplo em loop) |
+| ![Cores das pastas](docs/images/config-cores-das-pastas.jpg) | ![Dolphin com pastas coloridas](docs/images/dolphin-pastas.jpg) |
+| **Cores das pastas** | **Dolphin com o Vidro** |
 
-```bash
-vidro-config json                              # tudo, com os valores padrão
-vidro-config set Scrollbar width 8 --apply     # muda e aplica
-vidro-config apply                           # reaplica tudo
-```
+#### Telas de login e de bloqueio
 
-### NotepadK
+A tela de login (SDDM) e a de bloqueio (**Win+L**) usam o mesmo visual, montado na aba **Tela de login**:
 
-Sem interface, o NotepadK é só o texto num bloco de uma cor, com uma faixa invisível no topo para arrastar a janela (clique duplo maximiza). O botão no canto, ou **Ctrl+Shift+Espaço**, traz de volta a barra de título, os menus, as ferramentas e os números de linha, com uma transição suave.
+- **Fundo:** Honeywave, o seu papel de parede atual, **uma galeria com os papéis de parede instalados** (miniaturas clicáveis), **qualquer foto** sua, **um vídeo** (em loop, sem som, com velocidade ajustável) ou cor lisa; desfoque e força do desfoque; escurecer.
+- **Relógio:** mostrar, 24 h ou 12 h, segundos, tamanho, espessura da letra, data.
+- **Senha e avatar:** posição (centro ou esquerda), cor de destaque, vidro dos campos, foto do usuário (círculo ou quadrado), fonte.
+- **Tela de bloqueio igual à de login** (liga/desliga). A transição do relógio entre a tela parada e a caixa de senha é um movimento só, junto com o desfoque.
+- **Prévia em janela** (redimensionável; **Esc 3 vezes** fecha) e **"Aplicar na tela de login"** (pede a senha de administrador). Opção de pedir a senha ao ligar (desliga o login automático).
 
-![NotepadK: modo foco e interface completa](docs/images/notepadk.jpg)
+| | |
+|---|---|
+| ![Exemplo da tela de login](docs/images/settings-login-studio.jpg) | ![Tela de bloqueio](docs/images/tela-de-bloqueio.jpg) |
+| **Estúdio da tela de login** | **Tela de bloqueio** |
 
-### Telas de bloqueio e de sair
+#### Estúdio do cursor
 
-![Tela de bloqueio e tela de sair](docs/images/tela-de-bloqueio.jpg)
-![Tela de sair](docs/images/tela-de-sair.jpg)
+Gera um tema de cursores completo (47 formas + todos os nomes do Breeze, em SVG e Xcursor):
 
-<sub>Nas fotos, o nome e a foto do usuário foram trocados por genéricos.</sub>
+- 4 formas de seta, cor de dentro, cor do contorno, cor dos detalhes (espera, selos), espessura do contorno, cantos arredondados, sombra, tamanho; modelos prontos; área para testar cada cursor; desligar volta ao cursor que você usava.
+- **Importar desenhos:** troque a seta, a mão, o texto, a espera, o proibido, o mover e a mira por um **SVG** seu ou por **cursores do Windows (.ico/.cur)**. Com "Cores do estúdio" **o editor trabalha em cima do desenho** (cores, contorno, cantos e sombra); com "Cores originais" ele fica como está. Arquivos .cur trazem o próprio ponto de clique; nos outros você escolhe (automático, canto, topo, centro). A seta importada também vale para copiar, ajuda, ocupado etc.
+
+![Cursores com desenhos importados](docs/images/settings-cursor-import.jpg)
+
+<sub>Exemplo: estrela (SVG) e seta (.cur) importadas com as cores do estúdio; outra estrela e uma seta .ico com as cores originais.</sub>
+
+#### Mouse
+
+Velocidade e aceleração (constante ou adaptativa), canhoto, clique do meio com esquerdo + direito, velocidade da rodinha, linhas por passo, rolagem natural, tempo do clique duplo (com área de teste); touchpad (tocar para clicar, rolagem natural, velocidade); **achar o cursor** (sacudir para crescer, mostrar cliques, esconder parado ou ao digitar). Vale na hora para todos os mouses conectados.
+
+### Sistema
+
+| Aba | O que tem |
+|---|---|
+| **Sons do sistema** | Liga/desliga, som ao mudar o volume; **todos os temas instalados** em cartões com ▶ para ouvir cada evento; o conjunto **Vidro** (sons minimalistas feitos por síntese, com entrada e saída no clima dos anos 90); **Meu preset** (tema base + um som seu ou de outro tema para cada evento) e **salvar o preset como tema**; **importar** temas comuns (`.tar.gz`, `.tar.xz`, `.zip`, pasta com `index.theme`) ou sons soltos (por exemplo um pacote `.wav` do Windows: o Vidro reconhece "Logon", "Error", "tada"…); **exportar** qualquer tema em `.tar.gz`. |
+| **Atualizações** | Procura as versões publicadas aqui, mostra as novidades e instala por cima, mantendo as suas configurações. |
+
+![Aba Atualizações](docs/images/config-atualizacoes.jpg)
+
+### Também incluído
+
+- **Efeitos do KWin** próprios (abrir/fechar, minimizar, maximizar, mostrar área de trabalho, menus e pop-ups, transparência, barra aparecer/sumir) — aparecem em *Configurações do sistema → Efeitos da área de trabalho*.
+- **Estilo do Plasma "Vidro"**, esquema de cores, tema de ícones de pastas e documentos.
+- **Telas de bloqueio e de sair** de vidro (Plasma 6.8).
+- **Widget de transparência** para o painel e **widget de clima** leve.
+
+![Sombra antes e depois](docs/images/sombras-antes-depois.jpg)
 
 ---
 
-## Requisitos
-
-- **KDE Plasma 6** (testado no **6.8**, sessão **Wayland**)
-- `python3` (vem em praticamente todas as distribuições)
-- Opcionais:
-  - **ImageMagick** (`magick`): cor automática da barra de título e fundo desfocado da tela de sair
-  - **Union** (`plasma-union`): estilo de apps "vidro"
-  - **Tela icon theme** (`Tela-red-dark`): ícones de apps coloridos; sem ele, usa o Breeze Dark
-  - Para o NotepadK: Kate e as ferramentas de compilação (veja abaixo)
-
 ## Instalar
+
+Precisa do **KDE Plasma 6** (testado no 6.8, Wayland). Tudo é instalado **só na sua conta** (`~/.local`, `~/.config`), sem `sudo`, e as suas configurações são copiadas antes para `~/.local/share/vidro/backup-<data>`.
+
+### Pacotes pelo terminal (copie e cole)
+
+**Debian / Ubuntu / KDE neon / Kubuntu:**
+```bash
+curl -fLo /tmp/vidro-kde.deb "$(curl -fsSL https://api.github.com/repos/pznp-ia/vidro-kde/releases/latest | grep -o 'https://[^"]*_amd64\.deb' | head -1)" \
+  && sudo apt install /tmp/vidro-kde.deb && vidro-kde-install
+```
+
+**Fedora / openSUSE:**
+```bash
+curl -fLo /tmp/vidro-kde.rpm "$(curl -fsSL https://api.github.com/repos/pznp-ia/vidro-kde/releases/latest | grep -o 'https://[^"]*x86_64\.rpm' | head -1)" \
+  && sudo dnf install /tmp/vidro-kde.rpm && vidro-kde-install      # openSUSE: sudo zypper install --allow-unsigned-rpm /tmp/vidro-kde.rpm
+```
+
+**Arch / Manjaro / EndeavourOS / CachyOS:**
+```bash
+mkdir -p /tmp/vidro-kde && cd /tmp/vidro-kde \
+  && curl -fLO https://github.com/pznp-ia/vidro-kde/releases/latest/download/PKGBUILD && makepkg -si && vidro-kde-install
+```
+
+**Bazzite, Kinoite, Aurora, SteamOS e outros imutáveis:** use a [instalação rápida](#instalação-rápida) (não precisa instalar pacote no sistema).
+
+### Pelo código (qualquer distribuição)
 
 ```bash
 git clone https://github.com/pznp-ia/vidro-kde.git
 cd vidro-kde
+bash packaging/install-deps.sh     # dependências (Debian/Ubuntu, Fedora, Arch, openSUSE) — pede sudo
 ./install.sh
 ```
 
-Abre uma janela para escolher os extras (animações, telas de bloqueio, barra de rolagem sobreposta, clima, tela de login, NotepadK); o essencial sempre é instalado. Sem interface gráfica, pergunta no terminal. Para instalar sem perguntas: `./install.sh --all`, `./install.sh --only=effects,weather` ou `./install.sh --skip=sddm,notepadk` (veja `./install.sh --help`).
+O instalador abre uma janela para escolher os extras (animações, telas de bloqueio, barra de rolagem sobreposta, clima, tela de login, NotepadK). Sem janela: `./install.sh --all`, `--only=effects,weather` ou `--skip=sddm,notepadk` (veja `--help`).
 
 ![Instalador](docs/images/installer.jpg)
 
-Tudo é instalado só na sua conta (`~/.local/share`, `~/.local/bin`, `~/.config`), sem `sudo`. Antes de mudar qualquer coisa, o instalador guarda uma cópia das suas configurações em `~/.local/share/vidro/backup-<data>`.
+### Pacotes (na página de [Releases](https://github.com/pznp-ia/vidro-kde/releases))
 
-Depois:
-- **saia e entre de novo** na sessão (a tela de bloqueio nova vale a partir do próximo login);
-- adicione o widget **"Transparência das janelas"** ao painel (clique direito no painel → Adicionar widgets).
+| Distribuição | Arquivo | Comando |
+|---|---|---|
+| Debian, Ubuntu, KDE neon, Kubuntu | `vidro-kde_<versão>_amd64.deb` | `sudo apt install ./vidro-kde_*_amd64.deb` |
+| Fedora, openSUSE | `vidro-kde-<versão>-1.x86_64.rpm` | `sudo dnf install ./vidro-kde-*.rpm` |
+| Arch, Manjaro, EndeavourOS, CachyOS | `PKGBUILD` | `makepkg -si` (na pasta do PKGBUILD) |
+| Qualquer outra / imutáveis (Bazzite, Kinoite, Aurora, SteamOS) | `vidro-kde-<versão>.tar.gz` | extrair e rodar `./install.sh` |
 
-### Perfis
-
-Guarde o visual inteiro com um nome e volte a ele quando quiser (aba **Perfis** no app ou pelo terminal):
+Os pacotes colocam os arquivos em `/usr/share/vidro-kde`; depois **cada usuário** roda uma vez:
 
 ```bash
-vidro-profile save "Meu visual"
-vidro-profile load "Meu visual"     # o visual de agora é guardado antes como "auto-…"
-vidro-profile export "Meu visual" ~/meu-visual.json
+vidro-kde-install
 ```
 
-### Atualizar
+Depois de instalar: **saia e entre de novo** na sessão e adicione o widget **"Transparência das janelas"** ao painel.
+
+**Partes nativas:** a barra de rolagem sobreposta, a janela de prévia e a prévia da tela de login vêm compiladas para o Qt 6.11. Com outro Qt o instalador tenta compilar (`bash packaging/install-deps.sh --build` instala o necessário) e, sem compilador, só pula essas partes — a prévia da tela de login passa a usar o modo de teste do SDDM.
+
+## Atualizar
 
 ```bash
 vidro-update               # instala a versão mais nova, se houver
-vidro-update --check   # só verifica
-vidro-update --list       # versões publicadas
-vidro-update --version v17  # instala uma versão específica (também serve para voltar)
+vidro-update --check       # só verifica
+vidro-update --list        # versões publicadas
+vidro-update --version v24 # instala uma versão específica (também serve para voltar)
 ```
 
-Ou pela aba **Atualizações** do app. A atualização mantém as suas configurações e o backup de antes do Vidro.
+Ou pela aba **Atualizações** do app.
 
-![Aba Atualizações](docs/images/config-atualizacoes.jpg)
-
-### Ligar e desligar
+## Linha de comando
 
 ```bash
-vidro-theme off   # volta ao Breeze Dark (bom para comparar o antes e o depois)
-vidro-theme on      # volta ao Vidro
-vidro-opacity 40   # transparência de 0 (opaco) a 100
+vidro-theme on|off|status                    # liga/desliga o visual (bom para comparar antes e depois)
+vidro-opacity 40                             # transparência das janelas, 0 a 100
+vidro-config json                            # todas as opções com os valores atuais
+vidro-config set Login background video --apply
+vidro-config apply                           # reaplica tudo
+vidro-profile save|load|list|delete|export|import "Meu visual"
 ```
 
-### Login (SDDM), opcional
+Sons (o mesmo que a aba faz):
 
 ```bash
-sudo bash components/sddm/install-sddm.sh            # usa o papel de parede Honeywave
+python3 ~/.local/share/vidro/modules/sounds.py --import ~/Downloads/tema.tar.gz
+python3 ~/.local/share/vidro/modules/sounds.py --export vidro ~/vidro-sons.tar.gz
+```
+
+### Login (SDDM) sem o app
+
+```bash
+sudo bash components/sddm/install-sddm.sh            # papel de parede Honeywave
 sudo bash components/sddm/install-sddm.sh foto.jpg   # ou uma imagem sua
+sudo bash components/sddm/undo-sddm.sh               # desfazer
 ```
-Testar sem reiniciar: `sddm-greeter-qt6 --test-mode --theme /usr/local/share/sddm/themes/vidro`.
-Desfazer: `sudo bash components/sddm/undo-sddm.sh`.
-O teclado de tela usado no login é o do sistema (por exemplo o plasma-keyboard); o tema não cria um teclado próprio.
 
-### NotepadK, opcional
-
-Instale as dependências de compilação (a lista por distribuição está no topo do script) e rode:
+### NotepadK
 
 ```bash
+bash packaging/install-deps.sh --build
 bash components/notepadk/install-notepadk.sh
 ```
-
-Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um `distrobox`/`toolbox` da mesma versão do sistema. O NotepadK usa o Kate do sistema, com configuração própria, então o seu Kate normal não muda.
+Em sistemas imutáveis, rode dentro de um `distrobox`/`toolbox` da mesma versão do sistema.
 
 ## Desinstalar
 
@@ -192,19 +292,18 @@ Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um
 
 ## Observações
 
-- **Telas de bloqueio e de sair:** no Plasma 6.8 elas ficam no "pacote de shell", então o Vidro usa um pacote próprio (`org.vidro.desktop`), apontado por uma variável de ambiente do KWin e do serviço de logout. Os arquivos QML vêm da versão 6.8; **em outras versões o instalador pula essa parte**, porque uma tela de bloqueio quebrada impediria desbloquear o PC.
-- **Bazzite e outras imagens "deck":** o Bazzite desativa o bloqueio de tela e a troca de usuário (`/etc/xdg/kdeglobals`) e entra direto no modo jogo, sem passar pelo SDDM. Em `extras/bazzite-unlock-screen/` há um script (com `sudo`) que libera o **Win+L**, e um para desfazer.
-- **Efeitos do KWin** (`vidro_maximize`, `vidro_minimize`, `vidro_popups`, `vidro_opacity`) são JavaScript e aparecem em *Configurações do sistema → Efeitos da área de trabalho*; dá para desligar cada um ali.
-- **A decoração** é gerada por `components/decoration/source/make-decoration.py` (modo `escuro` ou `claro`); edite as constantes no topo para mudar raio, cores ou sombra.
-- **Barra de rolagem por cima do conteúdo:** o estilo Union não permite isso só com CSS, então o Vidro tem um pequeno plugin do Qt (`components/native`, código em `fonte/`). Ele vem compilado para o Qt 6.11; com um Qt mais antigo o instalador tenta compilar (`cmake` + `g++`) e, sem compilador, pula essa parte. Ligar ou desligar vale a partir do próximo login.
-- **Os ícones** de pastas e documentos são gerados por `components/icons/Vidro/source/make-icons.py`.
+- **Telas de bloqueio e de sair:** no Plasma 6.8 elas ficam no "pacote de shell"; o Vidro usa um pacote próprio (`org.vidro.desktop`). Os arquivos vêm da versão 6.8; **em outras versões o instalador pula essa parte**, porque uma tela de bloqueio quebrada impediria desbloquear o PC.
+- **Bazzite e imagens "deck":** o Bazzite desativa o bloqueio de tela e entra direto no modo jogo. Em `extras/bazzite-unlock-screen/` há um script (com `sudo`) que libera o **Win+L**.
+- **Vídeo no login:** usa o QtMultimedia do sistema. O vídeo é copiado para o tema; prefira arquivos leves (MP4/WebM).
+- **Sons "Vidro":** gerados por síntese no seu PC (`components/settings/sounds/make-sounds.py`), sem amostras de terceiros.
+- **A decoração** é gerada por `components/decoration/source/make-decoration.py`; **os ícones** por `components/icons/Vidro/source/make-icons.py`.
 
 ## Problemas conhecidos
 
-- Com o efeito de transparência (`vidro_opacity`) ligado, uma janela minimizada pode continuar aparecendo bem fraca atrás de outras janelas translúcidas. Enquanto não há correção, `vidro-opacity 0` ou desligar o efeito resolve.
+- Com o efeito de transparência ligado, uma janela minimizada pode continuar aparecendo bem fraca atrás de outras janelas translúcidas (`vidro-opacity 0` resolve).
 - O NotepadK aparece agrupado com o Kate na barra de tarefas.
 
-## Mudanças (histórico)
+## Mudanças
 
 Veja [CHANGELOG.md](CHANGELOG.md).
 
@@ -212,18 +311,17 @@ Veja [CHANGELOG.md](CHANGELOG.md).
 
 GPL-3.0-or-later para o código próprio. Partes derivadas do KDE mantêm a licença original: veja [NOTICE.md](NOTICE.md).
 
+<sub>Nas fotos, o nome e a foto do usuário foram trocados por genéricos.</sub>
+
 ---
 
 ## English summary
 
-**Vidro** ("glass" in Portuguese) is a complete dark-glass look for **KDE Plasma 6** (tested on 6.8, Wayland). It includes:
-- an Aurorae window decoration with traffic-light buttons on the left and smooth gaussian shadows; the titlebar switches between dark and light to match the wallpaper;
-- KWin effects for maximize, minimize-to-icon, popups and adjustable window translucency (with a panel widget);
-- a Plasma style, a color scheme, a Union app style and a minimalist folder/document icon theme;
-- matching lock, logout and SDDM login screens;
-- **NotepadK**, a distraction-free notepad built on Kate (a Kate plugin).
-- **Vidro Settings** app (one tab per feature, each with a live preview): overlay macOS-like scrollbar, menu and panel-popup styling, accent/font/folder colors, borderless Dolphin, an experimental light variant and a minimalist Kdenlive launcher (EditorKden).
+**Vidro** ("glass") is a complete translucent look for **KDE Plasma 6** (tested on 6.8, Wayland) plus **Vidro Settings**, an app with one tab per feature, each with a live preview drawn over your wallpaper and on/off switches and sliders for everything:
 
-Update with `vidro-update` (fetches the releases published here; your settings are kept) or from the "Atualizações" tab of the app.
+- **Windows:** glass Aurorae decoration with traffic-light buttons (6 styles, side/order/colors), gaussian shadows, titlebar that follows the wallpaper brightness, per-animation styles for open/close/minimize-to-icon/maximize/show-desktop.
+- **Apps:** Union app-style studio, overlay macOS-like scrollbar, menus, accent/font colors, borderless Dolphin, light variant, EditorKden (minimal Kdenlive), **NotepadK** (distraction-free notepad on Kate: centered column, typewriter scrolling, word count, window opacity, transitions).
+- **Desktop:** launcher type/options, panel glass, taskbar and clock, **panel show/hide animation studio**, file/sidebar/folder icons, **cursor studio** (generates a full theme; import **SVG or Windows .ico/.cur** and style them with the editor), **mouse/touchpad** options, **login and lock screen studio** (wallpaper gallery, any photo or a **looping video** background, clock, layout, colors; resizable preview window).
+- **System:** **system sounds** (all installed themes, the synthesized minimalist "Vidro" set, your own preset, import/export of standard sound themes and loose Windows sound packs), updates.
 
-Install with `./install.sh` (per-user, no root; your settings are backed up first). Remove with `./uninstall.sh`. Optional: `sudo bash components/sddm/install-sddm.sh` for the login screen and `bash components/notepadk/install-notepadk.sh` for NotepadK. Messages and docs are in Brazilian Portuguese.
+Quick install (downloads the newest release and opens the installer window): `bash <(curl -fsSL https://github.com/pznp-ia/vidro-kde/releases/latest/download/install-vidro.sh)`. Or install from source with `bash packaging/install-deps.sh && ./install.sh` (per-user, no root, settings backed up), or use the **.deb / .rpm / PKGBUILD / tarball** from Releases and then run `vidro-kde-install` as each user. Update with `vidro-update`. Remove with `./uninstall.sh`.

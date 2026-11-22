@@ -23,6 +23,19 @@ Item {
         anchors.fill: parent; fillMode: Image.PreserveAspectCrop; cache: false; asynchronous: true
         source: (r.app && r.app.home) ? "file://" + r.app.home + "/.local/share/vidro/login/theme/" + (U.b(r.app, "Login", "blur", true) ? "background-blur.jpg" : "background.jpg") + "?v=" + r.app.version : ""
     }
+    // video background: plays the chosen video right here (same component as the login screen)
+    readonly property string videoFile: U.v(app, "Login", "background", "") === "video" ? String(U.v(app, "Login", "video", "")) : ""
+    Loader {
+        anchors.fill: parent
+        active: r.videoFile !== "" && r.app && r.app.home
+        source: active ? "file://" + r.app.home + "/.local/share/vidro/login/base/VideoBackground.qml" : ""
+        onLoaded: {
+            item.source = "file://" + r.videoFile;
+            item.speed = U.n(r.app, "Login", "video_speed", 100) / 100;
+            item.blurred = U.b(r.app, "Login", "blur", true);
+            item.blurAmount = Math.min(1, U.n(r.app, "Login", "blur_strength", 28) / 60);
+        }
+    }
     Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, r.dim) }
     readonly property real u: height / 26
     Column {

@@ -1,7 +1,7 @@
 """Cursor studio: generates the "VidroCursor" cursor theme (shape, colors, outline, corners, shadow)
 and applies it. The app preview uses ~/.cache/vidro/cursor-preview (SVG only, fast).
 Off = back to the cursor you used before (stored in ~/.local/share/vidro/cursor/previous)."""
-import json, os, subprocess, sys, time
+import glob, json, os, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
 from _common import flag as sim, num
 
@@ -17,6 +17,12 @@ DEFAULTS = {
     'shadow': '45',
     'size': '24',           # system cursor size
 }
+# imported SVG drawings (cursor studio "Import SVG"): file + hotspot per slot
+SLOTS = ('arrow', 'hand', 'text', 'wait', 'forbidden', 'move', 'crosshair')
+for _s in SLOTS:
+    DEFAULTS[f'svg_{_s}'] = ''          # path of the SVG ('' = Vidro's own drawing)
+    DEFAULTS[f'hot_{_s}'] = 'auto'      # auto (.cur: the file's own) | topleft | top | center
+    DEFAULTS[f'mode_{_s}'] = 'editor'   # editor (studio colors/outline/shadow on top) | original (file colors)
 DATA = os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
 GENERATOR = os.path.join(DATA, 'vidro', 'cursor', 'make-cursor.py')
 THEME = os.path.join(DATA, 'icons', 'VidroCursor')
@@ -25,8 +31,33 @@ PREVIOUS = os.path.join(DATA, 'vidro', 'cursor', 'previous')
 LAST = os.path.expanduser('~/.cache/vidro/cursor-last')
 
 
+IMPORTED = os.path.join(os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share')), 'vidro', 'cursor', 'imported')
+
+
+def _custom(cfg):
+    """Copies each chosen SVG into vidro/cursor/imported (survives moving the original) → JSON for the generator."""
+    import shutil
+    out = {}
+    for slot in SLOTS:
+        f = os.path.expanduser(str(cfg.get(f'svg_{slot}', '')).replace('file://', ''))
+        if not f:
+            continue
+        ext = os.path.splitext(f)[1].lower() if os.path.splitext(f)[1].lower() in ('.svg', '.ico', '.cur', '.png') else '.svg'
+        dest = os.path.join(IMPORTED, f'{slot}{ext}')
+        if os.path.isfile(f) and os.path.abspath(f) != dest:
+            os.makedirs(IMPORTED, exist_ok=True)
+            for old in glob.glob(os.path.join(IMPORTED, slot + '.*')):
+                os.remove(old)
+            shutil.copyfile(f, dest)
+        if os.path.isfile(dest):
+            out[slot] = {'file': dest, 'hot': cfg.get(f'hot_{slot}', 'auto'), 'mode': cfg.get(f'mode_{slot}', 'editor'),
+                         'mtime': os.path.getmtime(dest)}
+    return json.dumps(out, sort_keys=True)
+
+
 def _env(cfg):
     e = dict(os.environ)
+    e['VIDRO_CURSOR_CUSTOM'] = _custom(cfg)
     e.update(VIDRO_CURSOR_SHAPE=cfg.get('shape', 'modern'), VIDRO_CURSOR_FILL=cfg.get('fill', '#1d1e23'),
              VIDRO_CURSOR_OUTLINE=cfg.get('outline', '#ffffff'), VIDRO_CURSOR_ACCENT=cfg.get('accent', '#5b9cf5'),
              VIDRO_CURSOR_OUTLINE_WIDTH=str(num(cfg, 'outline_width', 0, 3, 1.3)), VIDRO_CURSOR_ROUNDNESS=str(num(cfg, 'roundness', 0, 3, 1)),

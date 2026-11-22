@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(vidro-login-preview LANGUAGES CXX)
+set(CMAKE_AUTOMOC ON)
+find_package(Qt6 REQUIRED COMPONENTS Gui Quick Qml)
+add_executable(vidro-login-preview main.cpp)
+target_link_libraries(vidro-login-preview Qt6::Gui Qt6::Quick Qt6::Qml)

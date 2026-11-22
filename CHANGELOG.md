@@ -1,5 +1,19 @@
 # Mudanças
 
+## v25 — 22/11/2026
+- **Tela de login de verdade:** as opções do estúdio não chegavam ao login (os valores "esquerda/quadrado" tinham mudado de nome na v24) e uma linha quebrada no `vidrorc` estragava a cor de destaque. Corrigido, e o `vidro-config` agora limpa valores quebrados sozinho.
+- **Fundo do login:** galeria com os papéis de parede instalados, qualquer foto, **vídeo em loop** (velocidade, desfoque e escurecer valem nele) ou cor lisa.
+- **Tela de bloqueio (Win+L) igual à de login** (liga/desliga), com o vídeo também; transição do relógio entre a tela parada e a caixa de senha num movimento só.
+- **Prévia em janela** da tela de login (redimensionável, **Esc 3 vezes** fecha; os botões de energia não fazem nada nela).
+- **NotepadK:** margens, coluna centralizada, destaque da linha atual, rolagem de máquina de escrever, contador de palavras; opacidade da janela, sempre no topo, barra de título no foco, botão flutuante; transições esmaecer/deslizar/zoom com curva e animação ao abrir.
+- **Barra: aparecer e sumir** (aba nova + efeito `vidro_panel`): estilo, duração e curva da animação da barra que se esconde sozinha.
+- **Estúdio do cursor:** importar **SVG, .ico e .cur** para 7 cursores, com o editor trabalhando em cima (cores, contorno, cantos, sombra) ou cores originais; ponto de clique do .cur. Os "modelos prontos" voltaram a funcionar.
+- **Mouse** (aba nova): velocidade, aceleração, canhoto, clique do meio, rodinha, rolagem natural, clique duplo, touchpad, sacudir para achar o cursor, mostrar cliques, esconder o cursor.
+- **Sons do sistema** (aba nova): temas instalados com prévia de cada evento, conjunto **Vidro** (minimalista, feito por síntese; entrada e saída no clima dos anos 90), **meu preset** e salvar como tema, **importar** temas comuns ou pacotes de sons soltos (ex.: sons do Windows) e **exportar**.
+- Os exemplos do app agora mostram **o seu papel de parede** (nítido).
+- **Outras distribuições:** `packaging/install-deps.sh` (Debian/Ubuntu, Fedora, Arch, openSUSE), pacotes **.deb, .rpm, PKGBUILD** e tarball no release; comando `vidro-kde-install` para cada usuário; detecção do Qt sem depender do `rpm`.
+- README refeito com todas as opções e **instalação rápida**: um comando no terminal ou um arquivo para clicar duas vezes (`install-vidro.sh`), além de comandos prontos para .deb, .rpm e Arch.
+
 ## v24 — 22/11/2026
 - **Código e comandos em inglês** (a interface continua em português): `vidro-theme on|off`, `vidro-opacity`, `vidro-titlebar`, `vidro-config apply`, `vidro-update --check`, `vidro-profile`. Os nomes antigos continuam funcionando como atalhos, e as configurações antigas (`~/.config/vidrorc`) são migradas sozinhas (cópia em `vidrorc.pt-backup`). Repositório reorganizado: `install.sh`, `uninstall.sh`, `components/…`.
 - **Instalador com janela:** escolha dos extras (animações, telas de bloqueio, barra sobreposta, clima, login, NotepadK), barra de progresso e resumo; também por terminal (`--all`, `--only=`, `--skip=`, `--no-gui`).

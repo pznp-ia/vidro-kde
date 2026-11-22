@@ -14,6 +14,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.kscreenlocker as ScreenLocker
 
 import org.kde.breeze.components
+import "VidroOptions.js" as VO
 
 FocusScope {
     id: sessionManager
@@ -47,12 +48,19 @@ FocusScope {
         passwordResult(password);
     }
 
+    // Vidro: options shared with the login screen (VidroOptions.js, written by Vidro Settings)
+    readonly property bool vLeft: VO.on && VO.alignLeft
+    readonly property real vGlass: VO.on ? VO.glass : 0.08
+    readonly property color vAccent: VO.on ? VO.accent : "#ffffff"
+    readonly property bool vSquare: VO.on && VO.squareAvatar
+    readonly property string vFont: VO.on && VO.font ? VO.font : Kirigami.Theme.defaultFont.family
+
     readonly property var usuario: (userListModel && userListModel.count > 0) ? userListModel.get(0) : null
 
     ColumnLayout {
         id: coluna
         width: Math.min(parent.width - Kirigami.Units.gridUnit * 2, Kirigami.Units.gridUnit * 19)
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: sessionManager.vLeft ? Math.round(parent.width * 0.08) : Math.round((parent.width - width) / 2)
         // center slightly below the middle, leaving room for the clock above
         y: Math.round(parent.height * 0.52 - userBlock.height)
         spacing: 0
@@ -60,10 +68,10 @@ FocusScope {
         // ---------- avatar + nome ----------
         Item {
             id: userBlock
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: sessionManager.vLeft ? Qt.AlignLeft : Qt.AlignHCenter
             implicitWidth: Kirigami.Units.gridUnit * 5.2
             implicitHeight: implicitWidth
-            visible: sessionManager.showUserList
+            visible: sessionManager.showUserList && (!VO.on || VO.showAvatar)
             property int currentIndex: 0
             function incrementCurrentIndex() {}
             function decrementCurrentIndex() {}
@@ -72,7 +80,7 @@ FocusScope {
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: -5
-                radius: width / 2
+                radius: sessionManager.vSquare ? width * 0.24 : width / 2
                 color: Qt.rgba(1, 1, 1, 0.06)
                 border.width: 1
                 border.color: Qt.rgba(1, 1, 1, 0.20)
@@ -89,7 +97,7 @@ FocusScope {
             Rectangle {
                 id: mascara
                 anchors.fill: parent
-                radius: width / 2
+                radius: sessionManager.vSquare ? width * 0.22 : width / 2
                 visible: false
                 layer.enabled: true
             }
@@ -111,8 +119,9 @@ FocusScope {
         }
 
         Text {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Kirigami.Units.gridUnit * 0.9
+            Layout.alignment: sessionManager.vLeft ? Qt.AlignLeft : Qt.AlignHCenter
+            Layout.topMargin: userBlock.visible ? Kirigami.Units.gridUnit * 0.9 : 0
+            font.family: sessionManager.vFont
             visible: sessionManager.showUserList
             text: sessionManager.usuario ? (sessionManager.usuario.realName || sessionManager.usuario.name) : ""
             color: "#f4f6fa"
@@ -128,7 +137,7 @@ FocusScope {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.largeSpacing
             Layout.preferredHeight: Math.max(implicitHeight, Kirigami.Units.gridUnit * 1.2)
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: sessionManager.vLeft ? Text.AlignLeft : Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
             textFormat: Text.PlainText
@@ -160,7 +169,7 @@ FocusScope {
             spacing: Kirigami.Units.smallSpacing * 2
 
             // spacer the size of the button → the pill stays centered
-            Item { Layout.preferredWidth: loginButton.Layout.preferredWidth; visible: passwordLayout.width > Kirigami.Units.gridUnit * 14 }
+            Item { Layout.preferredWidth: loginButton.Layout.preferredWidth; visible: !sessionManager.vLeft && passwordLayout.width > Kirigami.Units.gridUnit * 14 }
 
             PlasmaExtras.PasswordField {
                 id: passwordBox
@@ -179,9 +188,9 @@ FocusScope {
 
                 background: Rectangle {
                     radius: height / 2
-                    color: Qt.rgba(1, 1, 1, passwordBox.activeFocus ? 0.12 : 0.08)
+                    color: Qt.rgba(1, 1, 1, passwordBox.activeFocus ? sessionManager.vGlass + 0.04 : sessionManager.vGlass)
                     border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, passwordBox.activeFocus ? 0.34 : 0.16)
+                    border.color: passwordBox.activeFocus ? Qt.rgba(sessionManager.vAccent.r, sessionManager.vAccent.g, sessionManager.vAccent.b, VO.on ? 0.55 : 0.34) : Qt.rgba(1, 1, 1, 0.16)
                     Behavior on color { ColorAnimation { duration: Kirigami.Units.longDuration } }
                     Behavior on border.color { ColorAnimation { duration: Kirigami.Units.longDuration } }
                 }
@@ -222,7 +231,9 @@ FocusScope {
 
                 background: Rectangle {
                     radius: height / 2
-                    color: Qt.rgba(1, 1, 1, loginButton.down ? 0.26 : (loginButton.hovered || loginButton.activeFocus ? 0.18 : (passwordBox.text.length > 0 ? 0.14 : 0.08)))
+                    color: (VO.on && passwordBox.text.length > 0)
+                        ? Qt.rgba(sessionManager.vAccent.r, sessionManager.vAccent.g, sessionManager.vAccent.b, loginButton.down ? 0.5 : (loginButton.hovered ? 0.4 : 0.3))
+                        : Qt.rgba(1, 1, 1, loginButton.down ? 0.26 : (loginButton.hovered || loginButton.activeFocus ? 0.18 : (passwordBox.text.length > 0 ? 0.14 : sessionManager.vGlass * 0.9)))
                     border.width: 1
                     border.color: Qt.rgba(1, 1, 1, loginButton.activeFocus ? 0.45 : 0.18)
                     Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }

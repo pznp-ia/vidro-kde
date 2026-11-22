@@ -1,0 +1,4 @@
+#!/bin/bash
+# Installed by the vidro-kde package: Vidro is per user, so each person runs this once (no sudo).
+#   vidro-kde-install [install.sh options]     e.g. --all, --only=effects,weather, --skip=sddm
+exec bash /usr/share/vidro-kde/install.sh "$@"

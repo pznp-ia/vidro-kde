@@ -10,6 +10,8 @@ Options through environment variables (all optional):
   VIDRO_CURSOR_OUTLINE_WIDTH  outline thickness (0-3, in px of 32)
   VIDRO_CURSOR_ROUNDNESS      corner rounding (0-3)
   VIDRO_CURSOR_SHADOW         shadow (0-100)
+  VIDRO_CURSOR_CUSTOM         JSON {slot: {"file": "/path.svg", "hot": "auto|topleft|top|center"}} — imported drawings
+                              (slots: arrow, hand, text, wait, forbidden, move, crosshair); used as they are, scaled to 32x32
 Generates cursors_scalable/ (SVG, used by Plasma 6 on Wayland) and, without --svg-only,
 cursors/ (Xcursor, for X11 apps), with the same names and aliases as Breeze."""
 import io, json, math, os, re, struct, subprocess, sys
@@ -45,8 +47,139 @@ ARROW = ARROWS.get(SHAPE, ARROWS['modern'])
 ARROW_HOT = (6.5, 4) if SHAPE == 'modern' else (6, 4)
 
 
+# ---------- imported SVG drawings ----------
+import html as _html
+try:
+    CUSTOM = json.loads(E('VIDRO_CURSOR_CUSTOM', '') or '{}')
+except ValueError:
+    CUSTOM = {}
+
+
+def _raster(path):
+    """.ico/.cur/.png → (RGBA image of the largest frame, hotspot in pixels or None)."""
+    from PIL import Image
+    hot = None
+    try:
+        raw = open(path, 'rb').read()
+        if raw[:4] == b'\x00\x00\x02\x00':   # .cur: hotspot per image in the directory
+            n = int.from_bytes(raw[4:6], 'little'); best = -1
+            for i in range(n):
+                e = raw[6 + 16 * i: 22 + 16 * i]
+                w = e[0] or 256
+                if w > best:
+                    best, hot = w, (int.from_bytes(e[4:6], 'little'), int.from_bytes(e[6:8], 'little'), w)
+        data = bytearray(raw)
+        if raw[:4] == b'\x00\x00\x02\x00':
+            data[2] = 1          # same layout as .ico: Pillow's ICO reader handles BMP and PNG frames
+        im = Image.open(io.BytesIO(bytes(data)) if path.lower().endswith(('.cur', '.ico')) else path)
+        sizes = sorted(getattr(im, 'info', {}).get('sizes', []) or [], key=lambda z: z[0] * z[1])
+        if sizes:
+            try:
+                im.size = sizes[-1]
+            except Exception:
+                pass
+        im = im.convert('RGBA')
+    except Exception:
+        return None, None
+    if hot:
+        hot = (hot[0] * im.width / hot[2], hot[1] * im.width / hot[2])
+    return im, hot
+
+
+def _trace(im):
+    """Alpha mask → one SVG path of pixel runs (so the editor can recolor and outline it)."""
+    a = im.getchannel('A').load()
+    d = []
+    for y in range(im.height):
+        x = 0
+        while x < im.width:
+            if a[x, y] > 110:
+                x0 = x
+                while x < im.width and a[x, y] > 110:
+                    x += 1
+                d.append(f'M{x0},{y}h{x - x0}v1h{x0 - x}z')
+            x += 1
+    return ''.join(d)
+
+
+def _imported(slot):
+    """Imported drawing of this slot as an item scaled into the 32x32 box, or None.
+    mode "editor" (default): drawn with the studio colors, outline, roundness and shadow.
+    mode "original": the file's own colors."""
+    c = CUSTOM.get(slot) or {}
+    f = os.path.expanduser(str(c.get('file', '')))
+    if not f or not os.path.isfile(f):
+        return None
+    styled = c.get('mode', 'editor') != 'original'
+    if re.search(r'\.(ico|cur|png)$', f, re.I):
+        im, hot = _raster(f)
+        if im is None:
+            return None
+        vb, unit = f'0 0 {im.width} {im.height}', max(im.width, im.height) / 30
+        if hot and slot not in _HOT_FROM_FILE:
+            _HOT_FROM_FILE[slot] = (1 + hot[0] / unit, 1 + hot[1] / unit)
+        if styled:
+            return ('xs', vb, f'<path d="{_trace(im)}"/>', unit)
+        import base64
+        buf = io.BytesIO(); im.save(buf, 'PNG')
+        uri = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+        inner = f'<image width="{im.width}" height="{im.height}" href="{uri}" xlink:href="{uri}" style="image-rendering:optimizeSpeed"/>'
+        return ('x', f'<g transform="{_box(vb)}">{inner}</g>')
+    try:
+        txt = open(f, encoding='utf-8', errors='replace').read()
+    except OSError:
+        return None
+    txt = re.sub(r'<\?xml.*?\?>|<!DOCTYPE[^>]*>|<!--.*?-->', '', txt, flags=re.S)
+    m = re.search(r'<svg\b([^>]*)>(.*)</svg\s*>', txt, re.S)
+    if not m:
+        return None
+    attrs, inner = m.group(1), m.group(2)
+    get = lambda k: (re.search(r'\b' + k + r'\s*=\s*["\']([^"\']*)["\']', attrs) or [None, None])[1]
+    vb = get('viewBox')
+    if not vb:
+        num_ = lambda v: float(re.match(r'[\d.]+', v).group()) if v and re.match(r'[\d.]+', v) else None
+        w, h = num_(get('width')), num_(get('height'))
+        vb = f'0 0 {w or 32} {h or 32}'
+    try:
+        parts = [float(x) for x in re.split(r'[\s,]+', vb.strip())]
+        unit = max(parts[2], parts[3]) / 30
+    except (ValueError, IndexError):
+        unit = 1
+    if styled:
+        return ('xs', vb, inner, unit)
+    return ('x', f'<g transform="{_box(vb)}">{inner}</g>')
+
+
+_HOT_FROM_FILE = {}
+
+
+def _box(vb):
+    """viewBox string → transform that fits it centered into the 30x30 box at (1,1) — QtSvg (used by
+    KWin for cursors) does not support nested <svg>, so imported drawings go in a transformed <g>."""
+    try:
+        x, y, w, h = [float(v) for v in re.split(r'[\s,]+', vb.strip())][:4]
+    except ValueError:
+        x, y, w, h = 0, 0, 32, 32
+    k = 30 / max(w, h, 1e-6)
+    dx, dy = 1 + (30 - w * k) / 2, 1 + (30 - h * k) / 2
+    return f'translate({dx:.4f} {dy:.4f}) scale({k:.6f}) translate({-x:.4f} {-y:.4f})'
+
+
+
+def _hot(slot, auto):
+    h = (CUSTOM.get(slot) or {}).get('hot', 'auto')
+    if h == 'auto' and slot in _HOT_FROM_FILE:   # .cur files carry their own hotspot
+        return _HOT_FROM_FILE[slot]
+    return {'topleft': (2, 2), 'top': (16, 2), 'center': (16, 16)}.get(h, auto)
+
+
+_ARROW_X = _imported('arrow')
+if _ARROW_X:
+    ARROW_HOT = _hot('arrow', (3, 2))
+
+
 def arrow():
-    return [('f', ARROW)]
+    return [_ARROW_X] if _ARROW_X else [('f', ARROW)]
 
 
 def badge(x, y, items, color=None):
@@ -172,6 +305,14 @@ SHAPES = {   # name: (items or function(frame), hotspot)
     'wait': (lambda q: spinner(q / FRAMES), (16, 16)),
     'progress': (lambda q: arrow() + spinner(q / FRAMES, 22.5, 23, 4.6, 2.4), ARROW_HOT),
 }
+# imported drawings replace the generated ones
+for _slot, _names, _auto in (('hand', ('pointer',), (13, 3)), ('text', ('text',), (16, 16)), ('wait', ('wait',), (16, 16)),
+                             ('forbidden', ('not-allowed',), (16, 16)), ('move', ('fleur', 'all-scroll'), (16, 16)),
+                             ('crosshair', ('crosshair',), (16, 16))):
+    _x = _imported(_slot)
+    if _x:
+        for _n in _names:
+            SHAPES[_n] = ([_x], _hot(_slot, _auto))
 
 
 # ---------- drawing ----------
@@ -216,11 +357,37 @@ def _draw(items, layer):
         elif t == 'd':  # thin dividers (between fingers, pencil) in the outline color
             if layer == 'inside':
                 out.append(f'<path d="{it[1]}" fill="none" stroke="{OUTLINE}" stroke-opacity=".55" stroke-width="{it[2]}" stroke-linecap="round"/>')
+        elif t == 'xs':   # imported drawing redrawn by the editor (fill/outline colors, outline, roundness)
+            vb, inner, unit = it[1], it[2], it[3]
+            box = f'<g transform="{_box(vb)}">'
+            if layer in ('outline', 'shadow'):
+                w = (2 * OW + RD + (1.2 if layer == 'shadow' else 0)) * unit
+                body = re.sub(r'stroke-width\s*[:=]\s*["\']?[\d.]+(px)?["\']?', '', _recolor(inner, OUTLINE))
+                out.append(f'{box}<g fill="{OUTLINE}" stroke="{OUTLINE}" stroke-width="{w:.3f}" stroke-linejoin="round" stroke-linecap="round">{body}</g></g>')
+            else:
+                extra = f' stroke="{FILL}" stroke-width="{RD * unit:.3f}" stroke-linejoin="round"' if RD > 0 else ''
+                out.append(f'{box}<g fill="{FILL}"{extra}>{_recolor(inner, FILL)}</g></g>')
+        elif t == 'x':   # imported drawing: as it is (no outline), dark silhouette for the shadow
+            if layer == 'inside':
+                out.append(it[1])
+            elif layer == 'shadow':
+                out.append(f'<g opacity=".55">{_silhouette(it[1])}</g>')
         elif t == 't':
             if layer == 'inside':
                 out.append(f'<text x="{it[2]}" y="{it[3]}" font-family="sans-serif" font-weight="700" font-size="7.5" '
                            f'text-anchor="middle" fill="#ffffff">{it[1]}</text>')
     return ''.join(out)
+
+
+def _recolor(markup, color):
+    """Same drawing in one color: recolors fill/stroke attributes and styles (keeps "none")."""
+    m = re.sub(r'(fill|stroke)\s*=\s*"(?!none)[^"]*"', rf'\1="{color}"', markup)
+    m = re.sub(r"(fill|stroke)\s*=\s*'(?!none)[^']*'", rf'\1="{color}"', m)
+    return re.sub(r'(fill|stroke)\s*:\s*(?!none)[^;"\'}]+', rf'\1:{color}', m)
+
+
+def _silhouette(markup):
+    return _recolor(markup, '#000000')
 
 
 def svg(items):
@@ -232,7 +399,7 @@ def svg(items):
     if OW > 0 or RD > 0:
         parts.append(_draw(items, 'outline'))
     parts.append(_draw(items, 'inside'))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">'
+    return ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">'
             + ''.join(parts) + '</svg>\n')
 
 

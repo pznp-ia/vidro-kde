@@ -19,7 +19,8 @@ Item {
         if (mode === "color") return U.color(U.v(app, "Scrollbar", "color", "#8ab4f8"), a)
         return Qt.rgba(0.92, 0.93, 0.96, a * 0.55)
     }
-    Rectangle { anchors.fill: parent; color: "#1b1c20" }
+    Backdrop { anchors.fill: parent; app: r.app }
+    Rectangle { anchors.fill: parent; anchors.margins: 8; radius: 10; color: Qt.alpha("#1b1c20", 0.86); border.color: Qt.rgba(1, 1, 1, 0.10) }
     Repeater {
         model: 2
         Item {

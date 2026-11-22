@@ -38,7 +38,7 @@ Item {
         { name: "general", label: "Geral", files: ["05"] },
         { name: "windows", label: "Janelas", files: ["10", "12", "14"] },
         { name: "apps", label: "Aplicativos", files: ["13", "20", "22", "27", "30", "40", "60", "65"] },
-        { name: "desktop", label: "Área de trabalho", files: ["23", "24", "28", "26", "26a", "26b", "80", "70"] },
+        { name: "desktop", label: "Área de trabalho", files: ["23", "24", "28", "29", "26", "26a", "26b", "80", "81", "70"] },
         { name: "system", label: "Sistema", files: ["90"] }
     ]
     property var openCategories: ["general", "windows"]

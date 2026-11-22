@@ -33,6 +33,7 @@
 #include <QMouseEvent>
 #include <QWindow>
 #include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
 #include <QScrollBar>
 #include <QEvent>
 #include <QGraphicsOpacityEffect>
@@ -44,6 +45,8 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
+#include <QRegularExpression>
+#include <KTextEditor/Document>
 
 // Top strip in focus mode: same color as the editor, used to drag the window
 // (clique duplo = maximizar/restaurar).
@@ -105,24 +108,39 @@ public:
             m_btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
             m_btn->setAutoRaise(true);
             m_btn->setFixedSize(28, 28);
+            m_btn->setVisible(setting("ShowButton", 1));
             m_btn->setIconSize(QSize(16, 16));
             m_btn->setToolTip(QStringLiteral("Interface completa (Ctrl+Shift+Espaço)"));
             m_btn->setCursor(Qt::PointingHandCursor);
             m_fx = new QGraphicsOpacityEffect(m_btn);
-            m_fx->setOpacity(0.35);
+            m_fx->setOpacity(kBtnOpacity);
             m_btn->setGraphicsEffect(m_fx);
             m_btn->installEventFilter(this);
             m_win->installEventFilter(this);
-            m_btn->show();
-            m_btn->raise();
+            if (setting("ShowButton", 1)) { m_btn->show(); m_btn->raise(); } else m_btn->hide();
+            m_count = new QLabel(m_win);
+            m_count->setAttribute(Qt::WA_TransparentForMouseEvents);
+            m_count->hide();
+            m_countTimer.setSingleShot(true);
+            m_countTimer.setInterval(400);
+            connect(&m_countTimer, &QTimer::timeout, this, &VidroFocusView::updateCount);
+            if (QWidget *c = m_win->centralWidget()) c->installEventFilter(this);
         }
         connect(m_mw, &KTextEditor::MainWindow::viewCreated, this, [this](KTextEditor::View *v) {
             QTimer::singleShot(0, this, [this, v] { applyView(v, m_full); });
+        });
+        connect(m_mw, &KTextEditor::MainWindow::viewChanged, this, [this](KTextEditor::View *v) {
+            if (m_doc) disconnect(m_doc, nullptr, this, nullptr);
+            m_doc = v ? v->document() : nullptr;
+            if (m_doc) connect(m_doc, &KTextEditor::Document::textChanged, this, [this] { m_countTimer.start(); });
+            m_countTimer.start();
+            QTimer::singleShot(0, this, [this] { applyMargins(); });
         });
         // apply the minimal mode after the window finishes building
         QTimer::singleShot(300, this, [this] { setFull(false); });
         m_full = !setting("StartFocused", 1);   // open in focus mode (default) or with the full interface
         QTimer::singleShot(1200, this, [this] { setFull(m_full); });
+        if (setting("OpenAnimation", 1)) QTimer::singleShot(320, this, [this] { openAnimation(); });
     }
 
     ~VidroFocusView() override
@@ -134,11 +152,13 @@ public:
 protected:
     bool eventFilter(QObject *o, QEvent *e) override
     {
-        if (o == m_win && (e->type() == QEvent::Resize || e->type() == QEvent::Show || e->type() == QEvent::LayoutRequest)) {
+        if (m_win && o == m_win->centralWidget() && e->type() == QEvent::Resize) {
+            QTimer::singleShot(0, this, [this] { applyMargins(); });
+        } else if (o == m_win && (e->type() == QEvent::Resize || e->type() == QEvent::Show || e->type() == QEvent::LayoutRequest)) {
             placeButton();
         } else if (o == m_btn && m_fx) {
             if (e->type() == QEvent::Enter) m_fx->setOpacity(1.0);
-            else if (e->type() == QEvent::Leave) m_fx->setOpacity(m_full ? 0.6 : 0.35);
+            else if (e->type() == QEvent::Leave) m_fx->setOpacity(m_full ? 0.6 : kBtnOpacity);
         }
         return QObject::eventFilter(o, e);
     }
@@ -146,7 +166,88 @@ protected:
 private:
     // NotepadK settings (katerc [NotepadK], written by Vidro Settings → NotepadK)
     static int setting(const char *key, int def) { return KSharedConfig::openConfig()->group(QStringLiteral("NotepadK")).readEntry(key, def); }
+    static QString settingStr(const char *key, const QString &def) { return KSharedConfig::openConfig()->group(QStringLiteral("NotepadK")).readEntry(key, def); }
     const int kStrip = qBound(16, setting("StripHeight", 30), 60); // height of the drag strip
+    const qreal kBtnOpacity = qBound(5, setting("ButtonOpacity", 35), 100) / 100.0;
+
+    QEasingCurve easing() const
+    {
+        const QString e = settingStr("Easing", QStringLiteral("smooth"));
+        if (e == QLatin1String("fast")) return QEasingCurve::OutExpo;
+        if (e == QLatin1String("bounce")) return QEasingCurve::OutBack;
+        if (e == QLatin1String("linear")) return QEasingCurve::Linear;
+        return QEasingCurve::InOutCubic;
+    }
+
+    // Text block: side/top margins and an optional centered column (N characters wide), focus mode only.
+    void applyMargins()
+    {
+        if (!m_win) return;
+        QWidget *c = m_win->centralWidget();
+        if (!c) return;
+        if (m_full) { c->setContentsMargins(0, 0, 0, 0); return; }
+        const int margin = qBound(0, setting("Margin", 24), 300);
+        const int top = qBound(0, setting("MarginTop", 8), 200);
+        int side = margin;
+        const int cols = setting("ColumnChars", 0);
+        const auto views = m_mw->views();
+        if (cols > 0 && !views.isEmpty()) {
+            const QFont f = views.first()->configValue(QStringLiteral("font")).value<QFont>();
+            const int colPx = QFontMetrics(f).horizontalAdvance(QString(cols, QLatin1Char('n'))) + 24;
+            side = qMax(margin, (c->width() - colPx) / 2);
+        }
+        if (c->contentsMargins() != QMargins(side, top, side, top)) c->setContentsMargins(side, top, side, top);
+        placeCount();
+    }
+
+    // discreet word counter (bottom right), focus mode only
+    void updateCount()
+    {
+        if (!m_count) return;
+        const bool on = !m_full && setting("WordCount", 0);
+        if (!on || !m_doc) { m_count->hide(); return; }
+        static const QRegularExpression ws(QStringLiteral("\\s+"));
+        const QString t = m_doc->text().trimmed();
+        const int n = t.isEmpty() ? 0 : int(t.split(ws, Qt::SkipEmptyParts).size());
+        m_count->setText(n == 1 ? QStringLiteral("1 palavra") : QStringLiteral("%1 palavras").arg(n));
+        const QColor bg = editorBackground();
+        const QColor fg = bg.lightness() > 128 ? QColor(0, 0, 0, 110) : QColor(255, 255, 255, 110);
+        m_count->setStyleSheet(QStringLiteral("color: %1; background: transparent; font-size: 9pt;").arg(fg.name(QColor::HexArgb)));
+        m_count->adjustSize();
+        m_count->show();
+        placeCount();
+    }
+    void placeCount()
+    {
+        if (!m_count || !m_win) return;
+        m_count->move(m_win->width() - m_count->width() - 18, m_win->height() - m_count->height() - 10);
+        m_count->raise();
+    }
+
+    // Opening: the text area appears with a fade (a cover in the editor color that fades out)
+    void openAnimation()
+    {
+        if (!m_win) return;
+        auto *cover = new QWidget(m_win);
+        cover->setAttribute(Qt::WA_TransparentForMouseEvents);
+        cover->setAutoFillBackground(true);
+        QPalette p = cover->palette();
+        p.setColor(QPalette::Window, editorBackground());
+        cover->setPalette(p);
+        cover->setGeometry(0, 0, m_win->width(), m_win->height());
+        auto *fx = new QGraphicsOpacityEffect(cover);
+        fx->setOpacity(1.0);
+        cover->setGraphicsEffect(fx);
+        cover->show();
+        cover->raise();
+        auto *anim = new QPropertyAnimation(fx, "opacity", cover);
+        anim->setDuration(qBound(150, int(setting("FadeMs", 320) * 1.6), 2000));
+        anim->setStartValue(1.0);
+        anim->setEndValue(0.0);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+        connect(anim, &QPropertyAnimation::finished, cover, &QObject::deleteLater);
+        QTimer::singleShot(950, anim, [anim] { anim->start(); });   // after the focus layout settles
+    }
 
     void placeButton()
     {
@@ -166,7 +267,8 @@ private:
     // underneath and fade the snapshot out.
     void transition(bool full)
     {
-        if (!m_win || !m_win->isVisible()) { setFull(full); return; }
+        const QString style = settingStr("Transition", QStringLiteral("fade"));
+        if (!m_win || !m_win->isVisible() || style == QLatin1String("none") || setting("FadeMs", 320) <= 0) { setFull(full); return; }
         if (m_overlay) { m_overlay->deleteLater(); m_overlay = nullptr; }
         auto *ov = new QLabel(m_win);
         ov->setPixmap(m_win->grab());
@@ -181,12 +283,30 @@ private:
         m_overlay = ov;
         setFull(full);
         ov->raise();
-        auto *anim = new QPropertyAnimation(fx, "opacity", ov);
-        anim->setDuration(qBound(0, setting("FadeMs", 320), 1500));
-        anim->setStartValue(1.0);
-        anim->setEndValue(0.0);
-        anim->setEasingCurve(QEasingCurve::InOutCubic);
-        connect(anim, &QPropertyAnimation::finished, ov, [this, ov] {
+        const int ms = qBound(0, setting("FadeMs", 320), 1500);
+        auto *anim = new QParallelAnimationGroup(ov);
+        auto *fade = new QPropertyAnimation(fx, "opacity", anim);
+        fade->setDuration(ms);
+        fade->setStartValue(1.0);
+        fade->setEndValue(0.0);
+        fade->setEasingCurve(easing());
+        anim->addAnimation(fade);
+        const QRect r0 = ov->geometry();
+        if (style == QLatin1String("slide") || style == QLatin1String("zoom")) {
+            ov->setScaledContents(true);
+            auto *geo = new QPropertyAnimation(ov, "geometry", anim);
+            geo->setDuration(ms);
+            geo->setStartValue(r0);
+            if (style == QLatin1String("slide"))
+                geo->setEndValue(r0.translated(0, full ? r0.height() / 10 : -r0.height() / 10));
+            else {
+                const int dx = r0.width() * (full ? -4 : 4) / 100, dy = r0.height() * (full ? -4 : 4) / 100;
+                geo->setEndValue(r0.adjusted(dx, dy, -dx, -dy));
+            }
+            geo->setEasingCurve(easing());
+            anim->addAnimation(geo);
+        }
+        connect(anim, &QAbstractAnimation::finished, ov, [this, ov] {
             if (m_overlay == ov) m_overlay = nullptr;
             ov->deleteLater();
         });
@@ -205,9 +325,14 @@ private:
         const QString path = scriptPath();
         QFile f(path);
         if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) return;
-        f.write(QStringLiteral("for (const w of workspace.windowList()) { if (w.pid === %1 && w.normalWindow) w.noBorder = %2; }\n")
+        const bool hideBar = !on && setting("HideTitlebar", 1);
+        const bool above = !on && setting("KeepAbove", 0);
+        const double opacity = qBound(30, setting("WindowOpacity", 100), 100) / 100.0;
+        f.write(QStringLiteral("for (const w of workspace.windowList()) { if (w.pid === %1 && w.normalWindow) { w.noBorder = %2; w.keepAbove = %3; w.opacity = %4; } }\n")
                     .arg(QCoreApplication::applicationPid())
-                    .arg(on ? QStringLiteral("false") : QStringLiteral("true"))
+                    .arg(hideBar ? QStringLiteral("true") : QStringLiteral("false"))
+                    .arg(above ? QStringLiteral("true") : QStringLiteral("false"))
+                    .arg(opacity)
                     .toUtf8());
         f.close();
         const QString name = QStringLiteral("notepadk-borda-%1-%2").arg(QCoreApplication::applicationPid()).arg(++m_scriptSeq);
@@ -249,7 +374,10 @@ private:
         for (int i = 0; i < me.keyCount(); ++i) {
             const auto role = static_cast<T::EditorColorRole>(me.value(i));
             QRgb c = base.editorColor(role);
-            if (role == T::CurrentLine || role == T::IconBorder || role == T::Separator || role == T::CodeFolding
+            if (role == T::CurrentLine && setting("CurrentLine", 0)) {
+                const QColor b = QColor::fromRgba(bg), t = QColor::fromRgba(base.textColor(T::Normal));
+                c = QColor::fromRgbF(b.redF() * 0.95 + t.redF() * 0.05, b.greenF() * 0.95 + t.greenF() * 0.05, b.blueF() * 0.95 + t.blueF() * 0.05).rgba();
+            } else if (role == T::CurrentLine || role == T::IconBorder || role == T::Separator || role == T::CodeFolding
                 || role == T::LineNumbers || role == T::WordWrapMarker || role == T::TabMarker)
                 c = bg;
             ec.insert(QString::fromLatin1(me.key(i)), hex(c));
@@ -269,6 +397,7 @@ private:
             if (base.isStrikeThrough(st)) o.insert(QStringLiteral("strike-through"), true);
             ts.insert(QString::fromLatin1(mt.key(i)), o);
         }
+        meta.insert(QStringLiteral("revision"), setting("CurrentLine", 0) ? 2 : 1);
         const QJsonObject root{{QStringLiteral("metadata"), meta}, {QStringLiteral("editor-colors"), ec}, {QStringLiteral("text-styles"), ts}};
         const QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/org.kde.syntax-highlighting/themes");
         QDir().mkpath(dir);
@@ -369,9 +498,11 @@ private:
         if (m_btn) {
             m_btn->setIcon(QIcon::fromTheme(full ? QStringLiteral("view-restore") : QStringLiteral("view-fullscreen")));
             m_btn->setToolTip(full ? QStringLiteral("Modo foco (Ctrl+Shift+Espaço)") : QStringLiteral("Interface completa (Ctrl+Shift+Espaço)"));
-            if (m_fx) m_fx->setOpacity(full ? 0.6 : 0.35);
+            if (m_fx) m_fx->setOpacity(full ? 0.6 : kBtnOpacity);
         }
         placeButton();
+        applyMargins();
+        updateCount();
         if (!full && qEnvironmentVariableIsSet("NOTEPADK_DEBUG"))
             QTimer::singleShot(800, this, [this] { dumpTree(); });
     }
@@ -442,6 +573,9 @@ private:
     QList<QPointer<QWidget>> m_hidden;
     QHash<KTextEditor::View *, QVariantMap> m_orig;
     bool m_full = false;
+    QLabel *m_count = nullptr;
+    QTimer m_countTimer;
+    QPointer<KTextEditor::Document> m_doc;
 };
 
 class VidroFocusPlugin : public KTextEditor::Plugin

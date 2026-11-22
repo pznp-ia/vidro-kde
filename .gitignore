@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 componentes/icones/Vidro/t/
 !componentes/nativo/libvidroscroll.so
+dist/

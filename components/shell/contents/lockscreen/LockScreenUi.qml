@@ -24,6 +24,7 @@ import org.kde.ki18n
 
 import org.kde.plasma.private.sessions
 import org.kde.breeze.components
+import "VidroOptions.js" as VO
 
 Item {
     id: lockScreenUi
@@ -231,20 +232,50 @@ Item {
 
         Component.onCompleted: launchAnimation.start();
 
+        // Vidro: same background as the login screen (Vidro Settings > Login screen), unless it is the live wallpaper
+        Image {
+            id: vidroBackground
+            anchors.fill: parent
+            visible: VO.on && VO.background !== ""
+            source: visible ? VO.background : ""
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: false
+            smooth: true
+        }
+        // video background (same video as the login screen); blurred by VidroFader like the photo
+        Loader {
+            id: vidroVideo
+            anchors.fill: parent
+            active: VO.on && !!VO.video
+            source: "VideoBackground.qml"
+            onLoaded: { item.source = VO.video; item.speed = VO.videoSpeed || 1; }
+        }
+
         VidroFader {
             anchors.fill: parent
+            blurOn: !VO.on || VO.useBlur
             state: lockScreenRoot.uiVisible ? "on" : "off"
             mainStack: mainStack
             footer: footer
             clock: clock
             alwaysShowClock: config.alwaysShowClock && !config.hideClockWhenIdle
 
-            Component.onCompleted: source = wallpaper
+            Component.onCompleted: source = vidroVideo.active ? vidroVideo : (vidroBackground.visible ? vidroBackground : wallpaper)
         }
 
         // Vidro: soft dark veil over the wallpaper (denser with the card open)
         Rectangle {
             anchors.fill: parent
+            visible: VO.on
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, Math.min(0.95, VO.dim * 1.13)) }
+                GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, VO.dim * 0.67) }
+                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Math.min(0.95, VO.dim * 1.4)) }
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            visible: !VO.on
             gradient: Gradient {
                 GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.14) }
                 GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, 0.0) }
@@ -258,37 +289,39 @@ Item {
             Behavior on opacity { NumberAnimation { duration: Kirigami.Units.veryLongDuration * 2; easing.type: Easing.InOutQuad } }
         }
 
+        // Vidro: one progress value (0 = idle, 1 = password card) drives the clock's position, size and
+        // shadow together, on the same curve and duration as the background blur → one smooth movement
+        property real clockT: lockScreenRoot.uiVisible ? 1 : 0
+        Behavior on clockT { NumberAnimation { duration: Kirigami.Units.veryLongDuration * 1.9; easing.type: Easing.InOutCubic } }
+
         DropShadow {
             id: clockShadow
             anchors.fill: clock
             source: clock
-            visible: !lockScreenUi.softwareRendering && config.alwaysShowClock
+            visible: !lockScreenUi.softwareRendering && clock.visible && opacity > 0.01
             radius: 24
             verticalOffset: 2
             samples: 33
             spread: 0
             color : Qt.rgba(0, 0, 0, 0.35)
-            opacity: lockScreenRoot.uiVisible ? 0 : 1
-            Behavior on opacity {
-                OpacityAnimator {
-                    duration: Kirigami.Units.veryLongDuration * 2
-                    easing.type: Easing.InOutQuad
-                }
-            }
+            // follows the clock exactly (same scale and origin), fades as the darker card background comes in
+            scale: clock.scale
+            transformOrigin: clock.transformOrigin
+            opacity: clock.opacity * (1 - lockScreenRoot.clockT)
         }
 
         VidroClock {
             id: clock
             property Item shadow: clockShadow
-            visible: config.alwaysShowClock
-            anchors.horizontalCenter: parent.horizontalCenter
+            visible: config.alwaysShowClock && (!VO.on || VO.showClock)
+            readonly property bool alignLeftV: VO.on && VO.alignLeft
+            readonly property real idleY: Math.round(lockScreenRoot.height * 0.40 - height / 2)
+            readonly property real cardY: Math.round(lockScreenRoot.height * 0.10)
+            x: alignLeftV ? Math.round(lockScreenRoot.width * 0.08) : Math.round((lockScreenRoot.width - width) / 2)
             // idle: closer to the center; with the card open: moves up and shrinks a little
-            y: lockScreenRoot.uiVisible ? Math.round(lockScreenRoot.height * 0.10)
-                                        : Math.round(lockScreenRoot.height * 0.40 - height / 2)
-            transformOrigin: Item.Top
-            scale: lockScreenRoot.uiVisible ? 0.8 : 1.0
-            Behavior on y { NumberAnimation { duration: Kirigami.Units.veryLongDuration * 1.5; easing.type: Easing.OutCubic } }
-            Behavior on scale { NumberAnimation { duration: Kirigami.Units.veryLongDuration * 1.5; easing.type: Easing.OutCubic } }
+            y: Math.round(idleY + (cardY - idleY) * lockScreenRoot.clockT)
+            transformOrigin: alignLeftV ? Item.TopLeft : Item.Top
+            scale: 1 - 0.2 * lockScreenRoot.clockT
         }
 
         ListModel {

@@ -3,7 +3,8 @@ import QtQuick
 Item {
     id: r
     property var app
-    Rectangle { anchors.fill: parent; color: "#202227" }
+    Backdrop { anchors.fill: parent; app: r.app }
+    Rectangle { anchors.fill: parent; anchors.margins: 8; radius: 10; color: Qt.alpha("#202227", 0.86); border.color: Qt.rgba(1, 1, 1, 0.10) }
     Row {
         anchors.centerIn: parent; spacing: 18
         Repeater {
