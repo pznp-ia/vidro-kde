@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "Appearance",
+        "Description": "Vidro: open and close animations for windows (style, duration and curve set in Vidro Settings)",
+        "Description[pt_BR]": "Vidro: animações de abrir e fechar janelas (estilo, duração e curva nas Configurações do Vidro)",
+        "EnabledByDefault": false,
+        "Id": "vidro_windows",
+        "License": "GPL",
+        "Name": "Vidro: open/close windows",
+        "Name[pt_BR]": "Vidro: abrir/fechar janelas"
+    },
+    "X-KDE-Ordering": 60,
+    "X-KWin-Config-TranslationDomain": "kwin",
+    "X-KWin-Exclusive-Category": "toplevel-open-close-animation",
+    "X-Plasma-API": "javascript"
+}

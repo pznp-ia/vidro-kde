@@ -1,5 +1,0 @@
-cmake_minimum_required(VERSION 3.20)
-project(menuteste LANGUAGES CXX)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-add_executable(vidro-previa main.cpp)
-target_link_libraries(vidro-previa Qt6::Widgets)

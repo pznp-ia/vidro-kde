@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "Appearance",
+        "Description": "Vidro: show desktop animation (corners, slide away, sink or fade)",
+        "Description[pt_BR]": "Vidro: animação de mostrar a área de trabalho (cantos, deslizar, afundar ou esmaecer)",
+        "EnabledByDefault": false,
+        "Id": "vidro_desktop",
+        "License": "GPL",
+        "Name": "Vidro: show desktop",
+        "Name[pt_BR]": "Vidro: mostrar área de trabalho"
+    },
+    "X-KDE-Ordering": 60,
+    "X-KWin-Exclusive-Category": "show-desktop",
+    "X-Plasma-API": "javascript"
+}

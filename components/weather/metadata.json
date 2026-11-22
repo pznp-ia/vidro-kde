@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [ { "Name": "Vidro" } ],
+        "Category": "Environment and Weather",
+        "Description": "Lightweight weather in the Vidro style: redraws only when new data arrives",
+        "Description[pt_BR]": "Clima leve no estilo Vidro: só redesenha quando chegam dados novos",
+        "Icon": "weather-few-clouds",
+        "Id": "org.vidro.weather",
+        "License": "GPL-3.0+",
+        "Name": "Vidro Weather",
+        "Name[pt_BR]": "Clima (Vidro)",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

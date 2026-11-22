@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="">
+    <entry name="OpenMs" type="Int"><default>150</default></entry>
+    <entry name="CloseMs" type="Int"><default>110</default></entry>
+    <entry name="Scale" type="Int"><default>97</default></entry>
+    <entry name="Slide" type="Int"><default>6</default></entry>
+    <entry name="PanelStyle" type="String"><default>slide</default></entry>
+    <entry name="MenuStyle" type="String"><default>fadescale</default></entry>
+  </group>
+</kcfg>

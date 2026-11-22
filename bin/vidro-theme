@@ -1,0 +1,63 @@
+#!/bin/bash
+# vidro-theme on|off|status
+#   on     → everything Vidro (global theme, effects, transparency, lock/logout screens)
+#   off    → Plasma's stock Breeze Dark (to compare before/after)
+# Your panel, wallpaper and files are NOT deleted — this only switches.
+# (Old Portuguese subcommands still work: ligar, desligar, estado.)
+set -u
+BIN="$HOME/.local/bin"
+kw() { kwriteconfig6 "$@"; }
+effects() { # enable/disable KWin effects now and in kwinrc: name=true|false ...
+    for e in "$@"; do
+        n=${e%=*}; v=${e#*=}
+        kw --file kwinrc --group Plugins --key "${n}Enabled" "$v"
+        if [ "$v" = true ]; then m=loadEffect; else m=unloadEffect; fi
+        dbus-send --session --dest=org.kde.KWin /Effects org.kde.kwin.Effects.$m string:"$n"
+    done
+}
+LOGOUT=~/.local/share/dbus-1/services/org.kde.LogoutPrompt.service
+UNION_DIR=~/.local/share/union/styles/vidro
+KWINENV=~/.config/systemd/user/plasma-kwin_wayland.service.d/vidro.conf
+
+case "${1:-status}" in
+on|ligar)
+    plasma-apply-lookandfeel -a org.vidro.desktop >/dev/null 2>&1
+    if [ -d "$UNION_DIR" ]; then
+        kw --file kdeglobals --group KDE --key widgetStyle Union
+        kw --file kdeglobals --group KDE --key unionStyle vidro
+    else
+        kw --file kdeglobals --group KDE --key widgetStyle Breeze   # without Union: Breeze style
+    fi
+    effects squash=false maximize=false fadingpopups=false slidingpopups=false \
+            vidro_minimize=true vidro_maximize=true vidro_popups=true vidro_opacity=true
+    [ -f "$LOGOUT.off" ] && mv "$LOGOUT.off" "$LOGOUT"
+    [ -f "$KWINENV.off" ] && mv "$KWINENV.off" "$KWINENV"
+    # translucent panel
+    dbus-send --session --dest=org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+        string:'panels().forEach(function(p){ p.opacity = "translucent"; })' >/dev/null 2>&1
+    # button layout, animations etc. from your Vidro settings
+    "$BIN/vidro-config" apply buttons animations >/dev/null 2>&1
+    "$BIN/vidro-titlebar" --force >/dev/null 2>&1
+    echo "Vidro on."
+    ;;
+off|desligar)
+    plasma-apply-lookandfeel -a org.kde.breezedark.desktop >/dev/null 2>&1
+    kw --file kdeglobals --group KDE --key widgetStyle Breeze
+    kw --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft MS
+    kw --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight HIAX
+    effects vidro_minimize=false vidro_maximize=false vidro_popups=false vidro_opacity=false \
+            vidro_windows=false vidro_desktop=false squash=true maximize=true fadingpopups=true
+    [ -f "$LOGOUT" ] && mv "$LOGOUT" "$LOGOUT.off"
+    [ -f "$KWINENV" ] && mv "$KWINENV" "$KWINENV.off"
+    echo "Stock Breeze Dark on."
+    ;;
+status|estado)
+    echo "Global theme: $(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)"
+    exit 0
+    ;;
+*) echo "usage: vidro-theme on|off|status"; exit 1 ;;
+esac
+systemctl --user daemon-reload
+busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus ReloadConfig >/dev/null 2>&1
+dbus-send --session --type=method_call --dest=org.kde.KWin /KWin org.kde.KWin.reconfigure
+echo "(Open apps switch style when reopened; the lock screen changes at the next login.)"

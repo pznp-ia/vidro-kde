@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Vidro (baseado em Fading Popups de Vlad Zahorodnii)"
+            }
+        ],
+        "Category": "Appearance",
+        "Description": "Vidro: short fade and scale for menus, tooltips and popups",
+        "EnabledByDefault": false,
+        "Id": "vidro_popups",
+        "License": "GPL",
+        "Name": "Vidro: menus and popups",
+        "Name[pt_BR]": "Vidro: menus e pop-ups",
+        "Description[pt_BR]": "Vidro: fade e escala curtos para menus, dicas e pop-ups"
+    },
+    "X-KDE-Ordering": 60,
+    "X-Plasma-API": "javascript"
+}

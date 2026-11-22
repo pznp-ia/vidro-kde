@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""vidro-profile — save and restore the whole Vidro look as named profiles.
+
+  vidro-profile list                  profiles (name, date); automatic backups start with "auto-"
+  vidro-profile save <name>           save the current look (every Vidro setting + wallpaper)
+  vidro-profile load <name>           apply a profile (the current look is saved first as "auto-…")
+  vidro-profile delete <name>
+  vidro-profile export <name> <file>  copy a profile to a file (to share or keep)
+  vidro-profile import <file> [name]  add a profile from a file
+  vidro-profile json                  list as JSON (used by Vidro Settings)
+
+Profiles live in ~/.local/share/vidro/profiles/<name>.json.
+"""
+import configparser, datetime, glob, json, os, re, shutil, subprocess, sys
+
+DATA = os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
+CONFIG = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+FOLDER = os.path.join(DATA, 'vidro', 'profiles')
+VIDRORC = os.path.join(CONFIG, 'vidrorc')
+APPLETS = os.path.join(CONFIG, 'plasma-org.kde.plasma.desktop-appletsrc')
+BIN = os.path.expanduser('~/.local/bin')
+KEEP_AUTO = 5   # automatic backups kept
+
+
+def safe(name):
+    name = re.sub(r'[^\w .-]', '', name).strip()
+    if not name:
+        sys.exit('invalid name')
+    return name
+
+
+def path(name):
+    return os.path.join(FOLDER, safe(name) + '.json')
+
+
+def wallpaper():
+    try:
+        s = open(APPLETS).read()
+    except OSError:
+        return ''
+    m = re.search(r'^\[Containments\]\[\d+\]\[Wallpaper\]\[org\.kde\.image\]\[General\]\n(?:[^\[\n].*\n)*?Image=(.*)$', s, re.M)
+    return m.group(1) if m else ''
+
+
+def current_settings():
+    out = subprocess.run([os.path.join(BIN, 'vidro-config'), 'json'], capture_output=True, text=True).stdout
+    return json.loads(out or '{}')
+
+
+def save(name, auto=False):
+    os.makedirs(FOLDER, exist_ok=True)
+    data = {'format': 1, 'name': name, 'created': datetime.datetime.now().isoformat(timespec='seconds'),
+            'auto': auto, 'wallpaper': wallpaper(), 'settings': current_settings()}
+    with open(path(name), 'w') as f:
+        json.dump(data, f, indent=1, ensure_ascii=False)
+    if auto:   # keep only the newest automatic backups
+        autos = sorted(glob.glob(os.path.join(FOLDER, 'auto-*.json')), key=os.path.getmtime)
+        for old in autos[:-KEEP_AUTO]:
+            os.remove(old)
+    return path(name)
+
+
+def load(name):
+    p = path(name)
+    if not os.path.exists(p):
+        sys.exit(f'profile not found: {name}')
+    data = json.load(open(p))
+    save('auto-' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S'), auto=True)
+    c = configparser.RawConfigParser(); c.optionxform = str
+    for group, values in data.get('settings', {}).items():
+        c.add_section(group)
+        for k, v in values.items():
+            c.set(group, k, str(v))
+    tmp = VIDRORC + '.tmp'
+    with open(tmp, 'w') as f:
+        c.write(f)
+    os.replace(tmp, VIDRORC)
+    image = data.get('wallpaper', '')
+    if image:
+        subprocess.run(['plasma-apply-wallpaperimage', image.replace('file://', '')], capture_output=True)
+    subprocess.run([os.path.join(BIN, 'vidro-config'), 'apply'])
+
+
+def listing():
+    out = []
+    for p in sorted(glob.glob(os.path.join(FOLDER, '*.json')), key=os.path.getmtime, reverse=True):
+        try:
+            d = json.load(open(p))
+        except ValueError:
+            continue
+        out.append({'name': os.path.basename(p)[:-5], 'created': d.get('created', ''), 'auto': bool(d.get('auto'))})
+    return out
+
+
+def main(a):
+    cmd = a[0] if a else 'list'
+    if cmd == 'list':
+        for p in listing():
+            print(f"{p['created']:20} {p['name']}")
+    elif cmd == 'json':
+        print(json.dumps(listing(), ensure_ascii=False))
+    elif cmd == 'save' and len(a) == 2:
+        print('saved:', save(safe(a[1])))
+    elif cmd == 'load' and len(a) == 2:
+        load(a[1]); print('loaded:', a[1])
+    elif cmd == 'delete' and len(a) == 2:
+        os.remove(path(a[1])); print('deleted:', a[1])
+    elif cmd == 'export' and len(a) == 3:
+        shutil.copy(path(a[1]), os.path.expanduser(a[2])); print('exported to', a[2])
+    elif cmd == 'import' and len(a) >= 2:
+        d = json.load(open(os.path.expanduser(a[1])))
+        if 'settings' not in d:
+            sys.exit('not a Vidro profile')
+        name = safe(a[2] if len(a) > 2 else d.get('name') or os.path.splitext(os.path.basename(a[1]))[0])
+        d['name'] = name; d['auto'] = False
+        os.makedirs(FOLDER, exist_ok=True)
+        json.dump(d, open(path(name), 'w'), indent=1, ensure_ascii=False)
+        print('imported:', name)
+    else:
+        print(__doc__); return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

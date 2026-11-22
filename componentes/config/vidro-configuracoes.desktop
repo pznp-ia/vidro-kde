@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Configurações do Vidro
-GenericName=Ajustes do tema Vidro
-Comment=Barra de rolagem, transparência e outros ajustes do tema Vidro
-Exec=plasmawindowed org.vidro.config
-Icon=preferences-desktop-theme
-Categories=Settings;DesktopSettings;Qt;KDE;
-Keywords=vidro;tema;barra;rolagem;transparência;

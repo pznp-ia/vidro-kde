@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Vidro"
+            }
+        ],
+        "Category": "Appearance",
+        "Description": "Vidro: translucent windows (active and inactive levels)",
+        "EnabledByDefault": false,
+        "Id": "vidro_opacity",
+        "License": "GPL",
+        "Name": "Vidro: window transparency",
+        "Name[pt_BR]": "Vidro: transparência das janelas",
+        "Description[pt_BR]": "Vidro: janelas translúcidas (níveis da ativa e das inativas)"
+    },
+    "X-KDE-Ordering": 50,
+    "X-Plasma-API": "javascript"
+}

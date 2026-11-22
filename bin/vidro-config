@@ -1,56 +1,64 @@
 #!/usr/bin/env python3
-"""vidro-config — configurações do Vidro (~/.config/vidrorc).
+"""vidro-config — Vidro settings (~/.config/vidrorc).
 
-  vidro-config get <Grupo> <chave>
-  vidro-config set <Grupo> <chave> <valor> [--aplicar]
-  vidro-config json                 todas as configurações (com padrões) em JSON
-  vidro-config aplicar [modulo...]  aplica os módulos (padrão: todos)
-  vidro-config modulos              lista os módulos
+  vidro-config get <Group> <key>
+  vidro-config set <Group> <key> <value> [--apply]
+  vidro-config json                 all settings (with defaults / current system values) as JSON
+  vidro-config apply [module...]    apply modules (default: all)
+  vidro-config modules              list modules and their groups
 
-Módulos: ~/.local/share/vidro/modulos/<nome>.py, cada um com
-  GRUPO = "Nome"            grupo no vidrorc
-  PADROES = {chave: valor}  valores padrão (strings)
-  def aplicar(cfg): ...     cfg = dict com os valores do grupo (já com padrões)
+Modules: ~/.local/share/vidro/modules/<name>.py — see _common.py for the module API.
+Settings written with the Portuguese names of older versions are migrated automatically.
+(Old Portuguese subcommands still work: aplicar, modulos.)
 """
 import configparser, importlib.util, json, os, sys
 
-CFG = os.path.join(os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'vidrorc')
-MOD = os.path.join(os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share')), 'vidro', 'modulos')
+DATA = os.environ.get('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
+CONFIG_FILE = os.path.join(os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')), 'vidrorc')
+MODULES = os.path.join(DATA, 'vidro', 'modules')
+sys.path.insert(0, MODULES)
 
 
-def ler():
+def load():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            import _migrate
+            _migrate.migrate(CONFIG_FILE)
+        except ImportError:
+            pass
     c = configparser.RawConfigParser(); c.optionxform = str
-    c.read(CFG)
+    c.read(CONFIG_FILE)
     return c
 
 
-def gravar(c):
-    tmp = CFG + '.tmp'
+def save(c):
+    tmp = CONFIG_FILE + '.tmp'
     with open(tmp, 'w') as f:
         c.write(f)
-    os.replace(tmp, CFG)
+    os.replace(tmp, CONFIG_FILE)
 
 
-def modulos():
+def modules():
     out = {}
-    if os.path.isdir(MOD):
-        for n in sorted(os.listdir(MOD)):
+    if os.path.isdir(MODULES):
+        for n in sorted(os.listdir(MODULES)):
             if n.endswith('.py') and not n.startswith('_'):
-                spec = importlib.util.spec_from_file_location('vidro_mod_' + n[:-3], os.path.join(MOD, n))
+                spec = importlib.util.spec_from_file_location('vidro_module_' + n[:-3], os.path.join(MODULES, n))
                 m = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(m)
                 out[n[:-3]] = m
     return out
 
 
-def grupo(c, m):
-    d = dict(getattr(m, 'PADROES', {}))
-    if hasattr(m, 'atual'):          # módulos que leem o estado de agora do sistema (painel, menu...)
+def values(c, m):
+    """Defaults < current system values (if the module reads them) < vidrorc."""
+    d = dict(getattr(m, 'DEFAULTS', {}))
+    if hasattr(m, 'current'):
         try:
-            d.update({k: v for k, v in (m.atual() or {}).items() if k in d})
+            d.update({k: v for k, v in (m.current() or {}).items() if k in d})
         except Exception as e:
-            print(f'{getattr(m, "GRUPO", "?")}: não consegui ler o estado atual ({e})', file=sys.stderr)
-    g = getattr(m, 'GRUPO', None)
+            print(f'{getattr(m, "GROUP", "?")}: could not read the current state ({e})', file=sys.stderr)
+    g = getattr(m, 'GROUP', None)
     if g and c.has_section(g):
         d.update(dict(c.items(g)))
     return d
@@ -59,42 +67,41 @@ def grupo(c, m):
 def main(a):
     if not a:
         print(__doc__); return 1
-    cmd = a[0]
-    c = ler()
+    cmd = {'aplicar': 'apply', 'modulos': 'modules'}.get(a[0], a[0])
+    c = load()
     if cmd == 'get' and len(a) == 3:
-        g, k = a[1], a[2]
-        for m in modulos().values():
-            if getattr(m, 'GRUPO', None) == g:
-                print(grupo(c, m).get(k, '')); return 0
-        print(c.get(g, k, fallback='')); return 0
+        group, key = a[1], a[2]
+        if c.has_option(group, key):
+            print(c.get(group, key)); return 0
+        for m in modules().values():
+            if getattr(m, 'GROUP', None) == group and key in getattr(m, 'DEFAULTS', {}):
+                print(m.DEFAULTS[key]); return 0
+        return 1
     if cmd == 'set' and len(a) >= 4:
-        g, k, v = a[1], a[2], a[3]
-        if not c.has_section(g):
-            c.add_section(g)
-        c.set(g, k, v); gravar(c)
-        if '--aplicar' in a:
-            for n, m in modulos().items():
-                if getattr(m, 'GRUPO', None) == g:
-                    m.aplicar(grupo(c, m))
+        group, key, value = a[1], a[2], a[3]
+        if not c.has_section(group):
+            c.add_section(group)
+        c.set(group, key, value)
+        save(c)
+        if '--apply' in a[4:] or '--aplicar' in a[4:]:
+            for m in modules().values():
+                if getattr(m, 'GROUP', None) == group:
+                    m.apply(values(c, m))
         return 0
     if cmd == 'json':
-        d = {s: dict(c.items(s)) for s in c.sections()}
-        for m in modulos().values():
-            g = getattr(m, 'GRUPO', None)
-            if g:
-                d[g] = grupo(c, m)
-        print(json.dumps(d, ensure_ascii=False)); return 0
-    if cmd == 'aplicar':
-        ms = modulos()
+        print(json.dumps({getattr(m, 'GROUP', n): values(c, m) for n, m in modules().items()}, ensure_ascii=False))
+        return 0
+    if cmd == 'apply':
+        ms = modules()
         for n in (a[1:] or list(ms)):
             if n in ms:
-                ms[n].aplicar(grupo(c, ms[n]))
+                ms[n].apply(values(c, ms[n]))
             else:
-                print('módulo desconhecido:', n, file=sys.stderr)
+                print('unknown module:', n, file=sys.stderr)
         return 0
-    if cmd == 'modulos':
-        for n, m in modulos().items():
-            print(n, getattr(m, 'GRUPO', ''))
+    if cmd == 'modules':
+        for n, m in modules().items():
+            print(n, getattr(m, 'GROUP', ''))
         return 0
     print(__doc__); return 1
 

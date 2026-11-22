@@ -2,9 +2,9 @@
 
 **Um visual de vidro escuro e translúcido para o KDE Plasma 6** — janelas com cantos arredondados e botões no estilo semáforo, sombras suaves, efeitos de abrir, maximizar e minimizar, ícones de pastas minimalistas, telas de bloqueio, de sair e de login combinando, e um bloco de notas sem distrações (NotepadK).
 
-*A glassy, translucent dark look for KDE Plasma 6 — window decoration, shadows, KWin effects, icons, lock/logout/login screens and a distraction-free notepad. English summary at the end.*
+*Code and commands are in English; the interface and docs are in Brazilian Portuguese. A glassy, translucent dark look for KDE Plasma 6 — window decoration, shadows, KWin effects, icons, lock/logout/login screens and a distraction-free notepad. English summary at the end.*
 
-![Área de trabalho com o Vidro: Dolphin e NotepadK](docs/fotos/area-de-trabalho.jpg)
+![Área de trabalho com o Vidro: Dolphin e NotepadK](docs/images/area-de-trabalho.jpg)
 
 ---
 
@@ -39,53 +39,65 @@
 | **Ícones de arquivos e da lateral** | — | papel escuro/claro/colorido/plano, etiquetas, cantos; lateral do Dolphin em linha, preenchida ou colorida |
 | **Tela de login** | — | fundo, desfoque, relógio, posição, cores e foto ajustáveis, com teste numa janela |
 | **Estúdio do cursor** | cursor do sistema | gera um tema de cursores completo com a forma, as cores, o contorno e a sombra que você escolher |
-| **Atualizações** | — | `vidro-atualizar` (ou a aba no app) baixa as versões novas daqui do GitHub |
+| **Animações** | do KDE | abrir, fechar, minimizar, maximizar, mostrar área de trabalho e menus: estilo, duração e curva de cada uma |
+| **Estilo dos aplicativos** | — | estúdio para botões, campos, caixas de seleção, abas, listas e foco de todos os apps do KDE |
+| **Perfis** | — | salve o visual inteiro e volte a ele; exporte para compartilhar |
+| **Clima** | widget do KDE | widget de clima leve, que só redesenha quando chegam dados novos |
+| **NotepadK** | — | fonte, cores, espaçamento e transição do modo foco |
+| **Atualizações** | — | `vidro-update` (ou a aba no app) baixa as versões novas daqui do GitHub |
 
 ### Sombras
 
 A sombra é desenhada pelo próprio tema com um perfil gaussiano (o mesmo de um desfoque de verdade), então as laterais e os cantos se encaixam sem emenda e sem aquela faixa escura dura embaixo.
 
-![Sombra antes e depois](docs/fotos/sombras-antes-depois.jpg)
+![Sombra antes e depois](docs/images/sombras-antes-depois.jpg)
 
-![Canto da janela de perto](docs/fotos/sombra-canto.jpg)
+![Canto da janela de perto](docs/images/sombra-canto.jpg)
 
 ### Configurações do Vidro
 
 Abra pelo menu de apps (**Configurações do Vidro**) ou com o **clique direito no widget** de transparência. Cada aba tem um exemplo desenhado que muda na hora em que você mexe; os apps já abertos pegam as mudanças de estilo quando são reabertos.
 
-![Todas as abas das Configurações do Vidro](docs/fotos/config-todas-as-abas.jpg)
+![Todas as abas das Configurações do Vidro](docs/images/config-todas-as-abas.jpg)
 
 | | |
 |---|---|
-| ![Barra de rolagem](docs/fotos/config-barra-de-rolagem.jpg) | ![Menus](docs/fotos/config-menus.jpg) |
+| ![Barra de rolagem](docs/images/config-barra-de-rolagem.jpg) | ![Menus](docs/images/config-menus.jpg) |
 | **Barra de rolagem:** por cima do conteúdo, some quando parada | **Menus:** cantos, fundo, realce e animação |
-| ![Menu iniciar](docs/fotos/config-menu-iniciar.jpg) | ![Cores das pastas](docs/fotos/config-cores-das-pastas.jpg) |
+| ![Menu iniciar](docs/images/config-menu-iniciar.jpg) | ![Cores das pastas](docs/images/config-cores-das-pastas.jpg) |
 | **Menu iniciar e pop-ups do painel** | **Cores das pastas** |
-| ![Cores](docs/fotos/config-cores-destaque-fonte.jpg) | ![Dolphin](docs/fotos/config-dolphin.jpg) |
+| ![Cores](docs/images/config-cores-destaque-fonte.jpg) | ![Dolphin](docs/images/config-dolphin.jpg) |
 | **Cor de destaque e da fonte** | **Dolphin sem linhas de separação** |
+
+| | |
+|---|---|
+| ![Animações](docs/images/settings-animations.jpg) | ![Estilo dos aplicativos](docs/images/settings-app-style.jpg) |
+| **Animações:** estilo, duração e curva | **Estilo dos aplicativos** |
+| ![Botões](docs/images/settings-buttons-studio.jpg) | ![Perfis](docs/images/settings-profiles.jpg) |
+| **Estúdio dos botões das janelas** | **Perfis** |
 
 O Dolphin com pastas na cor de destaque, sem linhas entre as partes e com a barra de rolagem fina:
 
-![Dolphin com o Vidro](docs/fotos/dolphin-pastas.jpg)
+![Dolphin com o Vidro](docs/images/dolphin-pastas.jpg)
 
 As configurações ficam em `~/.config/vidrorc` e também podem ser mudadas pelo terminal:
 
 ```bash
 vidro-config json                              # tudo, com os valores padrão
-vidro-config set Barra largura 8 --aplicar     # muda e aplica
-vidro-config aplicar                           # reaplica tudo
+vidro-config set Scrollbar width 8 --apply     # muda e aplica
+vidro-config apply                           # reaplica tudo
 ```
 
 ### NotepadK
 
 Sem interface, o NotepadK é só o texto num bloco de uma cor, com uma faixa invisível no topo para arrastar a janela (clique duplo maximiza). O botão no canto, ou **Ctrl+Shift+Espaço**, traz de volta a barra de título, os menus, as ferramentas e os números de linha, com uma transição suave.
 
-![NotepadK: modo foco e interface completa](docs/fotos/notepadk.jpg)
+![NotepadK: modo foco e interface completa](docs/images/notepadk.jpg)
 
 ### Telas de bloqueio e de sair
 
-![Tela de bloqueio e tela de sair](docs/fotos/tela-de-bloqueio.jpg)
-![Tela de sair](docs/fotos/tela-de-sair.jpg)
+![Tela de bloqueio e tela de sair](docs/images/tela-de-bloqueio.jpg)
+![Tela de sair](docs/images/tela-de-sair.jpg)
 
 <sub>Nas fotos, o nome e a foto do usuário foram trocados por genéricos.</sub>
 
@@ -106,8 +118,12 @@ Sem interface, o NotepadK é só o texto num bloco de uma cor, com uma faixa inv
 ```bash
 git clone https://github.com/pznp-ia/vidro-kde.git
 cd vidro-kde
-./instalar.sh
+./install.sh
 ```
+
+Abre uma janela para escolher os extras (animações, telas de bloqueio, barra de rolagem sobreposta, clima, tela de login, NotepadK); o essencial sempre é instalado. Sem interface gráfica, pergunta no terminal. Para instalar sem perguntas: `./install.sh --all`, `./install.sh --only=effects,weather` ou `./install.sh --skip=sddm,notepadk` (veja `./install.sh --help`).
+
+![Instalador](docs/images/installer.jpg)
 
 Tudo é instalado só na sua conta (`~/.local/share`, `~/.local/bin`, `~/.config`), sem `sudo`. Antes de mudar qualquer coisa, o instalador guarda uma cópia das suas configurações em `~/.local/share/vidro/backup-<data>`.
 
@@ -115,35 +131,45 @@ Depois:
 - **saia e entre de novo** na sessão (a tela de bloqueio nova vale a partir do próximo login);
 - adicione o widget **"Transparência das janelas"** ao painel (clique direito no painel → Adicionar widgets).
 
+### Perfis
+
+Guarde o visual inteiro com um nome e volte a ele quando quiser (aba **Perfis** no app ou pelo terminal):
+
+```bash
+vidro-profile save "Meu visual"
+vidro-profile load "Meu visual"     # o visual de agora é guardado antes como "auto-…"
+vidro-profile export "Meu visual" ~/meu-visual.json
+```
+
 ### Atualizar
 
 ```bash
-vidro-atualizar               # instala a versão mais nova, se houver
-vidro-atualizar --verificar   # só verifica
-vidro-atualizar --lista       # versões publicadas
-vidro-atualizar --versao v17  # instala uma versão específica (também serve para voltar)
+vidro-update               # instala a versão mais nova, se houver
+vidro-update --check   # só verifica
+vidro-update --list       # versões publicadas
+vidro-update --version v17  # instala uma versão específica (também serve para voltar)
 ```
 
 Ou pela aba **Atualizações** do app. A atualização mantém as suas configurações e o backup de antes do Vidro.
 
-![Aba Atualizações](docs/fotos/config-atualizacoes.jpg)
+![Aba Atualizações](docs/images/config-atualizacoes.jpg)
 
 ### Ligar e desligar
 
 ```bash
-vidro-tema desligar   # volta ao Breeze Dark (bom para comparar o antes e o depois)
-vidro-tema ligar      # volta ao Vidro
-vidro-transparencia 40   # transparência de 0 (opaco) a 100
+vidro-theme off   # volta ao Breeze Dark (bom para comparar o antes e o depois)
+vidro-theme on      # volta ao Vidro
+vidro-opacity 40   # transparência de 0 (opaco) a 100
 ```
 
 ### Login (SDDM), opcional
 
 ```bash
-sudo bash componentes/sddm/instalar-sddm.sh            # usa o papel de parede Honeywave
-sudo bash componentes/sddm/instalar-sddm.sh foto.jpg   # ou uma imagem sua
+sudo bash components/sddm/install-sddm.sh            # usa o papel de parede Honeywave
+sudo bash components/sddm/install-sddm.sh foto.jpg   # ou uma imagem sua
 ```
 Testar sem reiniciar: `sddm-greeter-qt6 --test-mode --theme /usr/local/share/sddm/themes/vidro`.
-Desfazer: `sudo bash componentes/sddm/desfazer-sddm.sh`.
+Desfazer: `sudo bash components/sddm/undo-sddm.sh`.
 O teclado de tela usado no login é o do sistema (por exemplo o plasma-keyboard); o tema não cria um teclado próprio.
 
 ### NotepadK, opcional
@@ -151,7 +177,7 @@ O teclado de tela usado no login é o do sistema (por exemplo o plasma-keyboard)
 Instale as dependências de compilação (a lista por distribuição está no topo do script) e rode:
 
 ```bash
-bash componentes/notepadk/instalar-notepadk.sh
+bash components/notepadk/install-notepadk.sh
 ```
 
 Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um `distrobox`/`toolbox` da mesma versão do sistema. O NotepadK usa o Kate do sistema, com configuração própria, então o seu Kate normal não muda.
@@ -159,7 +185,7 @@ Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um
 ## Desinstalar
 
 ```bash
-./desinstalar.sh        # pergunta se quer restaurar as configurações de antes
+./uninstall.sh        # pergunta se quer restaurar as configurações de antes
 ```
 
 ---
@@ -167,15 +193,15 @@ Em sistemas imutáveis (Bazzite, Kinoite, Aurora…), rode o script dentro de um
 ## Observações
 
 - **Telas de bloqueio e de sair:** no Plasma 6.8 elas ficam no "pacote de shell", então o Vidro usa um pacote próprio (`org.vidro.desktop`), apontado por uma variável de ambiente do KWin e do serviço de logout. Os arquivos QML vêm da versão 6.8; **em outras versões o instalador pula essa parte**, porque uma tela de bloqueio quebrada impediria desbloquear o PC.
-- **Bazzite e outras imagens "deck":** o Bazzite desativa o bloqueio de tela e a troca de usuário (`/etc/xdg/kdeglobals`) e entra direto no modo jogo, sem passar pelo SDDM. Em `extras/bazzite-liberar-bloqueio/` há um script (com `sudo`) que libera o **Win+L**, e um para desfazer.
+- **Bazzite e outras imagens "deck":** o Bazzite desativa o bloqueio de tela e a troca de usuário (`/etc/xdg/kdeglobals`) e entra direto no modo jogo, sem passar pelo SDDM. Em `extras/bazzite-unlock-screen/` há um script (com `sudo`) que libera o **Win+L**, e um para desfazer.
 - **Efeitos do KWin** (`vidro_maximize`, `vidro_minimize`, `vidro_popups`, `vidro_opacity`) são JavaScript e aparecem em *Configurações do sistema → Efeitos da área de trabalho*; dá para desligar cada um ali.
-- **A decoração** é gerada por `componentes/aurorae-Vidro/fonte/gerar-vidro.py` (modo `escuro` ou `claro`); edite as constantes no topo para mudar raio, cores ou sombra.
-- **Barra de rolagem por cima do conteúdo:** o estilo Union não permite isso só com CSS, então o Vidro tem um pequeno plugin do Qt (`componentes/nativo`, código em `fonte/`). Ele vem compilado para o Qt 6.11; com um Qt mais antigo o instalador tenta compilar (`cmake` + `g++`) e, sem compilador, pula essa parte. Ligar ou desligar vale a partir do próximo login.
-- **Os ícones** de pastas e documentos são gerados por `componentes/icones/Vidro/fonte/gerar-icones.py`.
+- **A decoração** é gerada por `components/decoration/source/make-decoration.py` (modo `escuro` ou `claro`); edite as constantes no topo para mudar raio, cores ou sombra.
+- **Barra de rolagem por cima do conteúdo:** o estilo Union não permite isso só com CSS, então o Vidro tem um pequeno plugin do Qt (`components/native`, código em `fonte/`). Ele vem compilado para o Qt 6.11; com um Qt mais antigo o instalador tenta compilar (`cmake` + `g++`) e, sem compilador, pula essa parte. Ligar ou desligar vale a partir do próximo login.
+- **Os ícones** de pastas e documentos são gerados por `components/icons/Vidro/source/make-icons.py`.
 
 ## Problemas conhecidos
 
-- Com o efeito de transparência (`vidro_opacity`) ligado, uma janela minimizada pode continuar aparecendo bem fraca atrás de outras janelas translúcidas. Enquanto não há correção, `vidro-transparencia 0` ou desligar o efeito resolve.
+- Com o efeito de transparência (`vidro_opacity`) ligado, uma janela minimizada pode continuar aparecendo bem fraca atrás de outras janelas translúcidas. Enquanto não há correção, `vidro-opacity 0` ou desligar o efeito resolve.
 - O NotepadK aparece agrupado com o Kate na barra de tarefas.
 
 ## Mudanças (histórico)
@@ -198,6 +224,6 @@ GPL-3.0-or-later para o código próprio. Partes derivadas do KDE mantêm a lice
 - **NotepadK**, a distraction-free notepad built on Kate (a Kate plugin).
 - **Vidro Settings** app (one tab per feature, each with a live preview): overlay macOS-like scrollbar, menu and panel-popup styling, accent/font/folder colors, borderless Dolphin, an experimental light variant and a minimalist Kdenlive launcher (EditorKden).
 
-Update with `vidro-atualizar` (fetches the releases published here; your settings are kept) or from the "Atualizações" tab of the app.
+Update with `vidro-update` (fetches the releases published here; your settings are kept) or from the "Atualizações" tab of the app.
 
-Install with `./instalar.sh` (per-user, no root; your settings are backed up first). Remove with `./desinstalar.sh`. Optional: `sudo bash componentes/sddm/instalar-sddm.sh` for the login screen and `bash componentes/notepadk/instalar-notepadk.sh` for NotepadK. Messages and docs are in Brazilian Portuguese.
+Install with `./install.sh` (per-user, no root; your settings are backed up first). Remove with `./uninstall.sh`. Optional: `sudo bash components/sddm/install-sddm.sh` for the login screen and `bash components/notepadk/install-notepadk.sh` for NotepadK. Messages and docs are in Brazilian Portuguese.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="">
+    <entry name="OpenStyle" type="String"><default>scale</default></entry>
+    <entry name="CloseStyle" type="String"><default>scale</default></entry>
+    <entry name="OpenMs" type="Int"><default>220</default></entry>
+    <entry name="CloseMs" type="Int"><default>180</default></entry>
+    <entry name="Curve" type="String"><default>smooth</default></entry>
+  </group>
+</kcfg>

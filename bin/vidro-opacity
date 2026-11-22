@@ -1,0 +1,5 @@
+#!/bin/bash
+# Usage: vidro-opacity <0-100>   (0 = opaque windows, 100 = most transparent: active 75%, inactive 60%)
+v=${1:-100}; [[ "$v" =~ ^[0-9]+$ ]] || { echo "usage: vidro-opacity <0-100>"; exit 1; }; (( v > 100 )) && v=100
+kwriteconfig6 --file kwinrc --group Effect-vidro_opacity --key Level "$v"
+dbus-send --session --type=method_call --dest=org.kde.KWin /Effects org.kde.kwin.Effects.reconfigureEffect string:vidro_opacity

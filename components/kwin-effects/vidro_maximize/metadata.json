@@ -1,0 +1,21 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Vidro"
+            }
+        ],
+        "Category": "Appearance",
+        "Description": "Vidro: smooth maximize/restore (morph or fade)",
+        "EnabledByDefault": false,
+        "Id": "vidro_maximize",
+        "License": "GPL",
+        "Name": "Vidro: maximize",
+        "Name[pt_BR]": "Vidro: maximizar",
+        "Description[pt_BR]": "Vidro: maximizar/restaurar suave (transformar ou esmaecer)"
+    },
+    "X-KDE-Ordering": 60,
+    "X-KWin-Exclusive-Category": "maximize",
+    "X-Plasma-API": "javascript"
+}

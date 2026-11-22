@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="">
+    <entry name="Style" type="String"><default>icon</default></entry>
+    <entry name="Ms" type="Int"><default>360</default></entry>
+    <entry name="Curve" type="String"><default>smooth</default></entry>
+  </group>
+</kcfg>

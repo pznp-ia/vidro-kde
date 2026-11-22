@@ -1,0 +1,100 @@
+#!/bin/bash
+# vidro-update — updates Vidro from the versions published on GitHub.
+#
+#   vidro-update                 install the newest version (if any)
+#   vidro-update --check         only tell whether there is a new version (installs nothing)
+#   vidro-update --list          list the published versions
+#   vidro-update --version v21   install a specific version (also works to go back)
+#
+# Your settings (~/.config/vidrorc) and the pre-Vidro backup are kept.
+# (Old Portuguese options still work: --verificar, --lista, --versao.)
+set -uo pipefail
+REPO="${VIDRO_REPO:-pznp-ia/vidro-kde}"
+API="https://api.github.com/repos/$REPO"
+D="${XDG_DATA_HOME:-$HOME/.local/share}"
+INSTALLED=$(cat "$D/vidro/version" 2>/dev/null || cat "$D/vidro/versao" 2>/dev/null || echo "none")
+
+fail() { echo "Error: $*" >&2; exit 1; }
+command -v curl >/dev/null || fail "curl not found."
+
+get_json() { curl -fsSL --max-time 20 -H 'Accept: application/vnd.github+json' "$1"; }
+
+# published versions: "tag<TAB>date<TAB>tarball url<TAB>title", newest first
+versions() {
+    get_json "$API/releases?per_page=50" | python3 -I -c '
+import json, sys
+for r in json.load(sys.stdin):
+    if r.get("draft") or r.get("prerelease"):
+        continue
+    print("\t".join([r["tag_name"], (r.get("published_at") or "")[:10], r["tarball_url"], (r.get("name") or r["tag_name"]).replace("\t", " ")]))
+'
+}
+
+# success if $1 is newer than $2 (v9 < v10 < v10b)
+is_newer() {
+    python3 -I - "$1" "$2" <<'EOF'
+import re, sys
+def key(v):
+    return [(int(p), '') if p.isdigit() else (-1, p) for p in re.findall(r'\d+|[a-z]+', v.lower().lstrip('v'))]
+sys.exit(0 if key(sys.argv[1]) > key(sys.argv[2]) else 1)
+EOF
+}
+
+LIST=$(versions) || fail "could not reach GitHub ($REPO). No internet?"
+[ -n "$LIST" ] || fail "no published versions in $REPO."
+LATEST=$(printf '%s\n' "$LIST" | head -1 | cut -f1)
+
+case "${1:-}" in
+--check|--verificar)
+    echo "installed=$INSTALLED"
+    echo "available=$LATEST"
+    if [ "$INSTALLED" = none ] || is_newer "$LATEST" "$INSTALLED"; then
+        echo "state=new"
+        get_json "$API/releases/tags/$LATEST" | python3 -I -c 'import json,sys; print("notes=" + (json.load(sys.stdin).get("body") or "").replace("\r","").replace("\n","\\n"))' 2>/dev/null
+    else
+        echo "state=current"
+    fi
+    exit 0 ;;
+--list|--lista)
+    printf '%s\n' "$LIST" | while IFS=$'\t' read -r tag date _ title; do
+        m=" "; [ "$tag" = "$INSTALLED" ] && m="*"
+        printf '%s %-6s %s  %s\n' "$m" "$tag" "$date" "$title"
+    done
+    exit 0 ;;
+--version|--versao)
+    TARGET="${2:-}"; [ -n "$TARGET" ] || fail "give the version, e.g. vidro-update --version v21" ;;
+"")
+    TARGET="$LATEST"
+    if [ "$INSTALLED" != none ] && ! is_newer "$TARGET" "$INSTALLED"; then
+        echo "Vidro is already the newest version ($INSTALLED)."; exit 0
+    fi ;;
+*)
+    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac
+
+URL=$(printf '%s\n' "$LIST" | awk -F'\t' -v t="$TARGET" '$1 == t { print $3 }')
+[ -n "$URL" ] || fail "version $TARGET does not exist. See: vidro-update --list"
+
+echo "Downloading Vidro $TARGET (installed: $INSTALLED)…"
+T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+curl -fsSL --max-time 300 "$URL" -o "$T/vidro.tar.gz" || fail "download failed: $URL"
+mkdir "$T/vidro"
+tar -xzf "$T/vidro.tar.gz" -C "$T/vidro" --strip-components=1 || fail "the downloaded package is corrupt."
+# new packages have install.sh (--update); old ones (up to v23) have instalar.sh (--atualizar)
+if [ -f "$T/vidro/install.sh" ]; then INSTALLER=install.sh; UPDATE=--update; VFILE=VERSION
+elif [ -f "$T/vidro/instalar.sh" ]; then INSTALLER=instalar.sh; UPDATE=--atualizar; VFILE=VERSAO
+else fail "the package has no installer."; fi
+[ -f "$T/vidro/$VFILE" ] || echo "$TARGET" > "$T/vidro/$VFILE"
+
+if [ "$INSTALLED" = none ]; then
+    bash "$T/vidro/$INSTALLER"
+else
+    # old versions (up to v17) do not know the update flag and would replace the pre-Vidro backup pointer
+    LAST_BACKUP=$(cat "$D/vidro/ultimo-backup" 2>/dev/null || cat "$D/vidro/last-backup" 2>/dev/null || true)
+    bash "$T/vidro/$INSTALLER" $UPDATE
+    if [ -n "$LAST_BACKUP" ]; then
+        echo "$LAST_BACKUP" > "$D/vidro/last-backup"
+        [ -f "$D/vidro/ultimo-backup" ] && echo "$LAST_BACKUP" > "$D/vidro/ultimo-backup"
+    fi
+    echo "$TARGET" > "$D/vidro/version"
+fi

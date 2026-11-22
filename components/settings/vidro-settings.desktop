@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Vidro Settings
+Name[pt_BR]=Configurações do Vidro
+GenericName=Vidro theme settings
+GenericName[pt_BR]=Ajustes do tema Vidro
+Comment=Window buttons, animations, app style, cursor, login screen and more
+Comment[pt_BR]=Botões das janelas, animações, estilo dos apps, cursor, tela de login e mais
+Exec=plasmawindowed org.vidro.config
+Icon=preferences-desktop-theme
+Categories=Settings;DesktopSettings;Qt;KDE;
+Keywords=vidro;theme;tema;glass;vidro;animations;animações;cursor;

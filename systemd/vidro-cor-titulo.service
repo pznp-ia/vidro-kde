@@ -1,7 +1,0 @@
-[Unit]
-Description=Vidro: ajusta cor do título das janelas ao papel de parede
-
-[Service]
-Type=oneshot
-ExecStartPre=/bin/sleep 1
-ExecStart=%h/.local/bin/vidro-cor-titulo

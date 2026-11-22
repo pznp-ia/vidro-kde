@@ -1,0 +1,41 @@
+#!/bin/bash
+# Matches the Vidro window decoration to the wallpaper brightness (dark or light titlebar),
+# and makes the blurred background used by the logout screen.
+# Usage: vidro-titlebar [--force]
+THEME=~/.local/share/aurorae/themes/Vidro
+STATE=~/.cache/vidro/titlebar-state
+CFG=~/.config/plasma-org.kde.plasma.desktop-appletsrc
+img=$(python3 -I - "$CFG" <<'PY'
+import sys, re, urllib.parse
+s = open(sys.argv[1]).read()
+# take Image= of the wallpaper (org.kde.image) of the first desktop
+for m in re.finditer(r'^\[Containments\]\[(\d+)\]\[Wallpaper\]\[org\.kde\.image\]\[General\]\n((?:[^\[\n].*\n?)*)', s, re.M):
+    im = re.search(r'^Image=(.*)$', m.group(2), re.M)
+    if im:
+        print(urllib.parse.unquote(im.group(1).replace('file://', ''))); break
+PY
+)
+# the wallpaper may be a package (folder) -> pick the largest image inside
+if [ -d "$img" ]; then img=$(find "$img" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-); fi
+[ -f "$img" ] || { echo "wallpaper not found: $img"; exit 0; }
+# blurred background for the Vidro logout screen (only redone when the wallpaper changed)
+BLUR=~/.cache/vidro/blurred-wallpaper.jpg; mkdir -p ~/.cache/vidro
+if [ "$1" = "--force" ] || [ ! -f "$BLUR" ] || [ "$(cat ~/.cache/vidro/wallpaper.src 2>/dev/null)" != "$img" ]; then
+  magick "$img" -resize 1280x -blur 0x28 -modulate 92,135 -quality 88 "$BLUR.tmp" 2>/dev/null && mv "$BLUR.tmp" "$BLUR" && echo "$img" > ~/.cache/vidro/wallpaper.src
+fi
+# mean brightness (0-1), weighting the top half, where titlebars usually are
+lum=$(magick "$img" -resize 200x200! -colorspace Gray \( +clone -crop 200x100+0+0 \) -delete 0 -format '%[fx:mean]' info: 2>/dev/null)
+[ -n "$lum" ] || exit 0
+mode=$(python3 -I -c "print('light' if $lum > 0.58 else 'dark')")
+# "Light" option of Vidro Settings on: the titlebar is always light
+[ "$("$HOME/.local/bin/vidro-config" get Light enabled 2>/dev/null)" = true ] && mode=light
+key="$img|$mode"
+if [ "$1" != "--force" ] && [ -f "$STATE" ] && [ "$(cat "$STATE")" = "$key" ]; then exit 0; fi
+python3 -I "$THEME/source/make-decoration.py" "$THEME" "$mode" >/dev/null
+echo "$key" > "$STATE"
+# make KWin reload the SVG: switch decoration away and back
+K() { kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 "$@"; }
+R() { dbus-send --session --type=method_call --dest=org.kde.KWin /KWin org.kde.KWin.reconfigure; }
+K --key library org.kde.breeze; K --key theme Breeze; R; sleep 0.5
+K --key library org.kde.kwin.aurorae.v2; K --key theme __aurorae__svg__Vidro; R
+echo "brightness=$lum -> $mode ($img)"

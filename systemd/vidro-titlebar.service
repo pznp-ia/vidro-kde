@@ -1,0 +1,7 @@
+[Unit]
+Description=Vidro: match the window titlebar to the wallpaper brightness
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 1
+ExecStart=%h/.local/bin/vidro-titlebar

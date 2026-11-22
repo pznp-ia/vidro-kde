@@ -1,5 +1,19 @@
 # Mudanças
 
+## v24 — 22/11/2026
+- **Código e comandos em inglês** (a interface continua em português): `vidro-theme on|off`, `vidro-opacity`, `vidro-titlebar`, `vidro-config apply`, `vidro-update --check`, `vidro-profile`. Os nomes antigos continuam funcionando como atalhos, e as configurações antigas (`~/.config/vidrorc`) são migradas sozinhas (cópia em `vidrorc.pt-backup`). Repositório reorganizado: `install.sh`, `uninstall.sh`, `components/…`.
+- **Instalador com janela:** escolha dos extras (animações, telas de bloqueio, barra sobreposta, clima, login, NotepadK), barra de progresso e resumo; também por terminal (`--all`, `--only=`, `--skip=`, `--no-gui`).
+- **Animações** (aba nova): abrir, fechar, minimizar, maximizar e mostrar área de trabalho, cada uma com estilo e duração, curva (suave, ágil, mola) e a velocidade geral do KDE; exemplo animado no app.
+- **Menus e pop-ups:** o menu iniciar, o relógio e a bandeja agora "sobem direto", opacos, sem a fase transparente estranha; menus de clique direito com estilo próprio; o desfoque acompanha a animação.
+- **Correção importante:** as opções de animação (inclusive as dos menus) nunca eram lidas pelos efeitos — eles usavam sempre os padrões. Agora mudam na hora.
+- **Estúdio de estilo dos aplicativos** (aba nova): botões (vidro, planos, contorno, preenchidos), campos, caixas de seleção, abas, seleção nas listas, foco, cantos e espaçamento.
+- **Estúdio dos botões das janelas:** uma cor para cada botão, quando mostrar os símbolos, espessura dos símbolos e efeito ao passar o mouse (clarear, brilho em volta).
+- **Perfis** (aba nova + `vidro-profile`): salvar, carregar, apagar, exportar e importar o visual inteiro; ao carregar, o visual atual é guardado antes.
+- **NotepadK** (aba nova): fonte, tamanho, cores, espaçamento entre linhas, quebra de linha, transição do modo foco, faixa de arrastar e abrir no modo foco.
+- **Ícone do "mostrar área de trabalho"** escolhível na aba da barra de tarefas.
+- **Widget de clima do Vidro:** substitui o do KDE, que redesenhava a tela sem parar (o plasmashell caiu de ~17 % para ~1 % de CPU e a GPU de ~49 % para ~4 %).
+- App de configurações com a lateral **agrupada e rolável** (Geral, Janelas, Aplicativos, Área de trabalho, Sistema).
+
 ## v23 — 21/11/2026
 - **Correção:** as opções da aba "Menu iniciar e pop-ups" não mudavam nada: o Plasma usa a versão translúcida do fundo dos pop-ups e o Vidro só gravava a outra. Agora grava nas duas.
 - **Menu iniciar: tipo e opções** (aba nova): Kickoff, menu clássico ou tela cheia (troca no mesmo lugar da barra, levando as opções); favoritos e apps em grade ou lista, itens compactos, categorias à direita, trocar categoria ao passar o mouse, botões do rodapé, nomes nos botões, formato do nome dos apps, ordem alfabética, ícone e texto do botão.

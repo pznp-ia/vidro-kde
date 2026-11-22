@@ -1,6 +1,1 @@
-#!/bin/bash
-# Uso: vidro-transparencia <0-100>   (0 = janelas opacas, 100 = máximo: ativa 75%, inativas 60%)
-v=${1:-100}; [[ "$v" =~ ^[0-9]+$ ]] || exit 1; (( v>100 )) && v=100
-kwriteconfig6 --file kwinrc --group Effect-vidro_opacity --key Level "$v"
-echo "$v" > "${XDG_CONFIG_HOME:-$HOME/.config}/vidro-transparencia"
-dbus-send --session --type=method_call --dest=org.kde.KWin /Effects org.kde.kwin.Effects.reconfigureEffect string:vidro_opacity
+vidro-opacity
