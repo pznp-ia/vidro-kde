@@ -312,8 +312,11 @@ def save_preset(name):
 
 def _play(path):
     if path and os.path.isfile(path):
-        subprocess.Popen(['pw-play', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        return True
+        for cmd in (['pw-play', path], ['paplay', path], ['ffplay', '-nodisp', '-autoexit', '-loglevel', 'quiet', path],
+                    ['canberra-gtk-play', '-f', path]):
+            if shutil.which(cmd[0]):
+                subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                return True
     return False
 
 

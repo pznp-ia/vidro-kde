@@ -24,7 +24,9 @@ DEFAULTS = {
     'hide_seconds': '5',
     'hide_typing': 'false',     # hide the cursor while typing
 }
-QDBUS = next((q for q in ('/usr/lib64/qt6/bin/qdbus', '/usr/bin/qdbus6', '/usr/bin/qdbus') if os.path.exists(q)), 'qdbus')
+import shutil as _sh
+QDBUS = next((q for q in (_sh.which('qdbus6'), _sh.which('qdbus-qt6'), '/usr/lib64/qt6/bin/qdbus', '/usr/lib/qt6/bin/qdbus',
+                          '/usr/lib/x86_64-linux-gnu/qt6/bin/qdbus', _sh.which('qdbus')) if q and os.path.exists(q)), 'qdbus')
 PATH = '/org/kde/KWin/InputDevice'
 
 

@@ -95,10 +95,11 @@ def _launchers(enable):
         os.makedirs(os.path.dirname(LAUNCHER), exist_ok=True)
         s = open(src).read().replace('Exec=dolphin', f'Exec=env {env} dolphin')
         open(LAUNCHER, 'w').write(s.replace('[Desktop Entry]', '[Desktop Entry]\n' + MARKS[0], 1))
-    os.makedirs(os.path.dirname(DBUS), exist_ok=True)
-    if not os.path.exists(DBUS):
+    dolphin = shutil.which('dolphin')   # no Dolphin (or a flatpak one): don't take over "open folder" of other apps
+    if dolphin and not os.path.exists(DBUS):
+        os.makedirs(os.path.dirname(DBUS), exist_ok=True)
         open(DBUS, 'w').write(f'{MARKS[0]}\n[D-BUS Service]\nName=org.freedesktop.FileManager1\n'
-                              f'Exec=/usr/bin/env {env} /usr/bin/dolphin --daemon\n')
+                              f'Exec=/usr/bin/env {env} {dolphin} --daemon\n')
 
 
 def apply(cfg):
@@ -118,7 +119,12 @@ def apply(cfg):
     css = (f'splitter {{ width: {max(1, spacing)}px; background-color: transparent; }}\n'
            'splitview handle { background-color: transparent; }\n'
            'toolbar, statusbar { border: none; border-top: none; border-bottom: none; }\n')
-    _style(vars_css, css)
     color = hex_color(cfg.get('background_color'), None) if cfg.get('background') == 'custom' else None
     _lists(darken, flag(cfg, 'unify') or bool(color), color)
-    _launchers(True)
+    # the borderless style is built on the Vidro Union style; without Union (e.g. SteamOS) only the colors apply
+    if os.path.isfile(os.path.join(BASE, 'contents', 'css', 'style.css')):
+        _style(vars_css, css)
+        _launchers(True)
+    else:
+        shutil.rmtree(STYLE, ignore_errors=True)
+        _launchers(False)

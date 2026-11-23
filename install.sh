@@ -87,8 +87,13 @@ progress_end() {
 command -v plasmashell >/dev/null || fail "KDE Plasma não encontrado."
 command -v kwriteconfig6 >/dev/null || fail "kwriteconfig6 não encontrado (o Vidro precisa do Plasma 6)."
 command -v python3 >/dev/null || fail "python3 é necessário."
-PV=$(plasmashell --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1 || true)
-[ -n "$PV" ] || PV=$(rpm -q --qf '%{VERSION}' plasma-workspace 2>/dev/null || dpkg-query -W -f '${Version}' plasma-workspace 2>/dev/null || true)
+# Plasma version: plasmashell (also without a screen), then the package manager of each family
+ver() { grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1; }
+PV=$( (plasmashell --version || QT_QPA_PLATFORM=offscreen plasmashell --version) 2>/dev/null | ver || true)
+[ -n "$PV" ] || PV=$(pacman -Q plasma-workspace 2>/dev/null | awk '{print $2}' | ver || true)
+[ -n "$PV" ] || PV=$(rpm -q --qf '%{VERSION}' plasma-workspace plasma6-workspace 2>/dev/null | grep -v 'not installed' | ver || true)
+[ -n "$PV" ] || PV=$(dpkg-query -W -f '${Version}' plasma-workspace 2>/dev/null | sed 's/^[0-9]*://' | ver || true)
+[ -n "$PV" ] || PV=$(sed -n 's/.*"Version": *"\([0-9.]*\)".*/\1/p' /usr/share/plasma/shells/org.kde.plasma.desktop/metadata.json 2>/dev/null | ver || true)
 case "$PV" in 6.*) ;; *) fail "o Vidro é para o Plasma 6 (encontrado: ${PV:-desconhecido}).";; esac
 UNION=0
 if [ -d /usr/share/union/styles/breeze ] || ls /usr/lib*/qt6/plugins/styles/*nion* >/dev/null 2>&1; then UNION=1; fi
@@ -233,6 +238,8 @@ if want native; then
     QT_SYS=$( (qtpaths6 --qt-version || /usr/lib/qt6/bin/qtpaths --qt-version || /usr/lib64/qt6/bin/qtpaths --qt-version \
                || /usr/lib/x86_64-linux-gnu/qt6/bin/qtpaths --qt-version || rpm -q --qf '%{VERSION}' qt6-qtbase \
                || pkg-config --modversion Qt6Core) 2>/dev/null | head -1 | grep -E '^6\.' || true)
+    # no Qt tools installed: read the version from the library file name (libQt6Core.so.6.x.y)
+    [ -n "$QT_SYS" ] || QT_SYS=$(ls /usr/lib*/libQt6Core.so.6.* /usr/lib/*/libQt6Core.so.6.* 2>/dev/null | sed -n 's/.*libQt6Core\.so\.\(6\.[0-9]*\.[0-9]*\)$/\1/p' | sort -V | tail -1)
     QT_BUILT=$(cat "$C/native/QT" 2>/dev/null)
     native_ok=0
     if [ -n "$QT_SYS" ] && [ -f "$C/native/libvidroscroll.so" ] \
@@ -275,8 +282,20 @@ if want lockscreen; then
         mkdir -p "$CFG/systemd/user/plasma-kwin_wayland.service.d" "$D/dbus-1/services"
         printf '[Service]\n# Vidro: lock screen from the org.vidro.desktop shell package\nEnvironment=PLASMA_DEFAULT_SHELL=org.vidro.desktop\n' \
             > "$CFG/systemd/user/plasma-kwin_wayland.service.d/vidro.conf"
-        printf '[D-BUS Service]\nName=org.kde.LogoutPrompt\nExec=/usr/bin/env PLASMA_DEFAULT_SHELL=org.vidro.desktop /usr/libexec/ksmserver-logout-greeter\n' \
-            > "$D/dbus-1/services/org.kde.LogoutPrompt.service"
+        # the logout greeter lives in a different place on each distro (Fedora /usr/libexec, Arch/SteamOS /usr/lib,
+        # Debian/Ubuntu /usr/lib/<arch>/libexec); without it, keep the system logout screen
+        GREETER=""
+        for g in /usr/libexec/ksmserver-logout-greeter /usr/lib/ksmserver-logout-greeter /usr/lib/*/libexec/ksmserver-logout-greeter \
+                 /usr/lib64/libexec/ksmserver-logout-greeter /usr/libexec/kf6/ksmserver-logout-greeter; do
+            [ -x "$g" ] && { GREETER=$g; break; }
+        done
+        if [ -n "$GREETER" ]; then
+            printf '[D-BUS Service]\nName=org.kde.LogoutPrompt\nExec=/usr/bin/env PLASMA_DEFAULT_SHELL=org.vidro.desktop %s\n' "$GREETER" \
+                > "$D/dbus-1/services/org.kde.LogoutPrompt.service"
+        else
+            rm -f "$D/dbus-1/services/org.kde.LogoutPrompt.service"
+            warn "ksmserver-logout-greeter não encontrado: a tela de sair fica a do sistema."
+        fi
         ok "telas de bloqueio e de sair (o bloqueio vale a partir do próximo login)"
     else
         warn "telas de bloqueio/sair puladas (feitas para o Plasma 6.8; o seu é $PV)."

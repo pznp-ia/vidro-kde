@@ -1,6 +1,6 @@
 """Icons of the Vidro icon theme: folder colors, file (document) icons and the small sidebar icons.
 Regenerates the icons and switches the icon theme back and forth so apps refresh immediately."""
-import colorsys, os, sys, time
+import colorsys, glob, os, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
 from _common import DATA, flag, kread, kwrite, num, run
 
@@ -90,5 +90,8 @@ def apply(cfg):
                    env=env, capture_output=True)
     # apps only reload icons when the theme changes: switch away and back
     for t in ('breeze-dark', 'Vidro'):
-        run('/usr/libexec/plasma-changeicons', t)
+        tool = next((p for p in ['/usr/libexec/plasma-changeicons', '/usr/lib/plasma-changeicons', '/usr/lib64/libexec/plasma-changeicons']
+                     + sorted(glob.glob('/usr/lib/*/libexec/plasma-changeicons')) if os.access(p, os.X_OK)), None)
+        if tool:   # Fedora /usr/libexec, Arch/SteamOS /usr/lib, Debian/Ubuntu /usr/lib/<arch>/libexec
+            run(tool, t)
         time.sleep(0.5)

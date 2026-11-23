@@ -1,5 +1,13 @@
 # Mudanças
 
+## v25b — 23/11/2026
+Correções para **SteamOS, Arch, Debian, Ubuntu e openSUSE** (testado em contêineres com SteamOS 3.9 e 3.10, Arch, Fedora 44, Debian 13, Ubuntu 25.10 e openSUSE Tumbleweed):
+- O instalador parava logo no começo ("o Vidro é para o Plasma 6") no SteamOS/Arch e no Debian/Ubuntu: a versão do Plasma agora é lida também sem tela e pelo pacman/dpkg/rpm.
+- **Tela de sair:** o Vidro procurava o programa só em `/usr/libexec`; no SteamOS/Arch ele fica em `/usr/lib` e no Debian/Ubuntu em `/usr/lib/<arch>/libexec`. Agora acha em todos (e, se não achar, deixa a tela do sistema).
+- Mesmo problema na troca de ícones (`plasma-changeicons`) e no `qdbus` do módulo de mouse.
+- Dolphin: sem o estilo Union (SteamOS, Debian, Ubuntu) o módulo quebrava; agora aplica só as cores. E não registra mais o Dolphin como gerenciador de arquivos se ele não estiver instalado.
+- Versão do Qt lida também sem as ferramentas de desenvolvimento; prévia dos sons funciona sem `pw-play` (usa `paplay`/`ffplay`).
+
 ## v25 — 22/11/2026
 - **Tela de login de verdade:** as opções do estúdio não chegavam ao login (os valores "esquerda/quadrado" tinham mudado de nome na v24) e uma linha quebrada no `vidrorc` estragava a cor de destaque. Corrigido, e o `vidro-config` agora limpa valores quebrados sozinho.
 - **Fundo do login:** galeria com os papéis de parede instalados, qualquer foto, **vídeo em loop** (velocidade, desfoque e escurecer valem nele) ou cor lisa.
